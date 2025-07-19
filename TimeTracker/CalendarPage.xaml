@@ -1,0 +1,34 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TimeTracker.CalendarPage"
+             Title="Calendar">
+    <ScrollView>
+        <VerticalStackLayout Padding="10">
+            <Label Text="Swipe Log Calendar" FontSize="20" HorizontalOptions="Center" />
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20" Margin="0,10,0,10">
+                <Button Text="&lt;" Clicked="PreviousMonth_Clicked" />
+                <Label x:Name="MonthYearLabel"
+           FontSize="18"
+           FontAttributes="Bold"
+           VerticalOptions="Center"/>
+                <Button Text="&gt;" Clicked="NextMonth_Clicked" />
+            </HorizontalStackLayout>
+            <Grid x:Name="CalendarGrid" RowSpacing="2" ColumnSpacing="2">
+            </Grid>
+            <Label x:Name="SelectedDateLabel" FontAttributes="Bold" Margin="10" />
+            <CollectionView x:Name="DaySessionsCollection" 
+                            VerticalOptions="Start">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="5" BackgroundColor="#f0f0f0" CornerRadius="8" Padding="10">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding TimeRange}" FontAttributes="Bold" />
+                                <Label Text="{Binding Duration}" TextColor="DarkGreen" FontSize="12" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

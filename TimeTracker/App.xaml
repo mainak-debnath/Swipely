@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TimeTracker.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Light Theme -->
+            <Color x:Key="PageBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="PrimaryTextColor">#1E1E1E</Color>
+            <Color x:Key="SecondaryTextColor">#888888</Color>
+            <Color x:Key="CardBackgroundColor">#F5F5F5</Color>
+            <Color x:Key="EntryBackgroundColor">#EEEEEE</Color>
+            <Color x:Key="ButtonColor">#007AFF</Color>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
