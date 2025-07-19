@@ -1,5 +1,7 @@
-﻿using System.Text.Json;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System.Text.Json;
 using System.Timers;
+using TimeTracker.Helpers;
 
 namespace TimeTracker
 {
@@ -19,17 +21,24 @@ namespace TimeTracker
         public MainPage()
         {
             InitializeComponent();
+            WeakReferenceMessenger.Default.Register<OfficeHoursUpdatedMessage>(this, async (r, message) =>
+            {
+                await UpdateUI();
+            });
             // Initialize the progress bar and assign it
             progressBar = new CircularProgressBarDrawable();
             ProgressBarView.Drawable = progressBar;
             LoadSwipeData();
-            bool isInside = swipeTimes.Count % 2 != 0;
-            if (isInside)
-                StartLiveTimer();
             MainThread.InvokeOnMainThreadAsync(async () => await UpdateUI());
 
 
             SwipeActionButton.Clicked += OnSwipeAction;
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await UpdateUI(); // This will refresh every time the page appears
         }
 
         private async void OnSwipeAction(object sender, EventArgs e)
