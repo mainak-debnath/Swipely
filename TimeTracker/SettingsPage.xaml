@@ -1,0 +1,58 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TimeTracker.SettingsPage"
+             Title="Settings"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="24">
+
+            <Label Text="Settings"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   HorizontalOptions="Center" />
+
+            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}"
+                   CornerRadius="12"
+                   Padding="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="16">
+
+                    <Label Text="Set Daily Office Hour Goal"
+       FontSize="18"
+       TextColor="{DynamicResource PrimaryTextColor}" />
+
+                    <Label Text="Hours:"
+       VerticalOptions="Center"
+       TextColor="{DynamicResource PrimaryTextColor}" />
+
+                    <Frame Padding="0"
+       CornerRadius="8"
+       BorderColor="{DynamicResource SecondaryTextColor}"
+       HasShadow="False"
+       HeightRequest="45"
+       BackgroundColor="{DynamicResource EntryBackgroundColor}">
+                        <Entry x:Name="HoursEntry"
+           Placeholder="5"
+           Keyboard="Numeric"
+           BackgroundColor="Transparent"
+           TextColor="{DynamicResource PrimaryTextColor}"
+           PlaceholderColor="{DynamicResource SecondaryTextColor}"
+           HorizontalTextAlignment="Center"
+           FontSize="16" />
+                    </Frame>
+
+
+                    <Button Text="Save"
+                            Clicked="OnSaveClicked"
+                            BackgroundColor="{DynamicResource ButtonColor}"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            CornerRadius="8"
+                            HeightRequest="45" />
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
