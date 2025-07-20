@@ -8,6 +8,7 @@ namespace TimeTracker
     public partial class MainPage : ContentPage
     {
         private bool showLogs = false;
+        private bool isLiveUpdating = false;
 
         private TimeSpan RequiredTime => TimeSpan.FromHours(
             Preferences.Get("OfficeHoursGoal", 5.0)
@@ -16,7 +17,6 @@ namespace TimeTracker
         private string storagePath => Path.Combine(FileSystem.AppDataDirectory, "swipes.json");
 
         private System.Timers.Timer? liveTimer;
-        private CircularProgressBarDrawable progressBar;
 
         public MainPage()
         {
@@ -25,9 +25,6 @@ namespace TimeTracker
             {
                 await UpdateUI();
             });
-            // Initialize the progress bar and assign it
-            progressBar = new CircularProgressBarDrawable();
-            ProgressBarView.Drawable = progressBar;
             LoadSwipeData();
             MainThread.InvokeOnMainThreadAsync(async () => await UpdateUI());
 
@@ -126,25 +123,7 @@ namespace TimeTracker
                 StopLiveTimer();
             }
 
-            // Update Progress Bar
-            var progressValue = (float)(totalInside.TotalSeconds / RequiredTime.TotalSeconds);
-
-            progressBar.TrackColor = Colors.Gray;
-            progressBar.ProgressColor = Colors.Green;
-
-            // Don't await animation during live updates to prevent blocking
-            var clampedProgress = Math.Clamp(progressValue, 0, 1);
-            if (liveTimer != null)
-            {
-                // During live updates, just set progress directly
-                progressBar.Progress = clampedProgress;
-                ProgressBarView.Invalidate();
-            }
-            else
-            {
-                // Only animate when not in live mode
-                await AnimateProgressBar(clampedProgress);
-            }
+            await UpdateLinearProgress(totalInside, hasActiveSessionToday);
 
             // Calculate Time Left
             var timeLeft = RequiredTime - totalInside;
@@ -153,9 +132,6 @@ namespace TimeTracker
             // Update UI Elements
             StatusLabel.Text = isInside ? "🟢 Currently IN" : "🔴 Currently OUT";
             ((Frame)StatusLabel.Parent).BackgroundColor = isInside ? Colors.LightGreen : Colors.IndianRed;
-
-            // Progress Text
-            ProgressTimeLabel.Text = $"{(int)totalInside.TotalHours}h {totalInside.Minutes}m / {(int)RequiredTime.TotalHours}h {RequiredTime.Minutes}m";
 
             // Time Left Message
             if (!isInside)
@@ -250,81 +226,61 @@ namespace TimeTracker
             }
         }
 
-        private async Task AnimateProgressBar(float newProgress)
-        {
-            // Skip animation if progress hasn't changed much or if we're doing live updates
-            if (Math.Abs(newProgress - progressBar.Progress) < 0.01f)
-            {
-                progressBar.Progress = newProgress;
-                ProgressBarView.Invalidate();
-                return;
-            }
-
-            float oldProgress = progressBar.Progress;
-            float duration = 300; // milliseconds
-            int frameRate = 30;
-            int totalFrames = (int)(duration / 1000 * frameRate);
-
-            if (totalFrames == 0) totalFrames = 1; // Prevent division by zero
-
-            float increment = (newProgress - oldProgress) / totalFrames;
-
-            for (int i = 0; i < totalFrames; i++)
-            {
-                progressBar.Progress += increment;
-                ProgressBarView.Invalidate();
-                await Task.Delay((int)(1000 / frameRate));
-            }
-
-            progressBar.Progress = newProgress; // Final snap
-            ProgressBarView.Invalidate();
-        }
-
-
         private class SwipeLogItem
         {
             public DateTime InTime { get; set; }
             public DateTime? OutTime { get; set; }
         }
-
-        public class CircularProgressBarDrawable : IDrawable
+        private async Task UpdateLinearProgress(TimeSpan totalInside, bool animate = true)
         {
-            public float Progress { get; set; } = 0;
-            public Color ProgressColor { get; set; } = Colors.Gray;
-            public Color TrackColor { get; set; } = Colors.Green;
+            var progressValue = totalInside.TotalSeconds / RequiredTime.TotalSeconds;
+            var clampedProgress = Math.Clamp(progressValue, 0, 1);
+            var percentage = (int)(clampedProgress * 100);
 
-            public void Draw(ICanvas canvas, RectF dirtyRect)
+            // Calculate target width (300 is the total width of the progress bar)
+            var targetWidth = 300 * clampedProgress;
+
+            // Update the time display
+            ProgressTimeLabel.Text = $"{(int)totalInside.TotalHours}h {totalInside.Minutes:D2}m / {(int)RequiredTime.TotalHours}h {RequiredTime.Minutes:D2}m";
+
+            // Update percentage
+            PercentageLabel.Text = $"{percentage}%";
+
+            // Update status text
+            if (clampedProgress >= 1.0)
             {
-                canvas.SaveState();
+                ProgressStatusLabel.Text = "🎉 Goal achieved!";
+                ProgressStatusLabel.TextColor = Colors.Green;
+                ProgressFill.BackgroundColor = Color.FromArgb("#DFC037");
+            }
+            else if (clampedProgress >= 0.8)
+            {
+                ProgressStatusLabel.Text = "Almost there!";
+                ProgressStatusLabel.TextColor = Colors.Orange;
+                ProgressFill.BackgroundColor = Color.FromArgb("#4CAF50"); // Green
+            }
+            else if (clampedProgress > 0)
+            {
+                var timeLeft = RequiredTime - totalInside;
+                ProgressStatusLabel.Text = $"{(int)timeLeft.TotalHours}h {timeLeft.Minutes}m remaining";
+                ProgressStatusLabel.TextColor = Colors.Gray;
+                ProgressFill.BackgroundColor = Color.FromArgb("#4CAF50"); // Green
+            }
+            else
+            {
+                ProgressStatusLabel.Text = "Ready to start!";
+                ProgressStatusLabel.TextColor = Colors.Gray;
+            }
 
-                float size = Math.Min(dirtyRect.Width, dirtyRect.Height);
-                float strokeWidth = size * 0.1f; 
-                float radius = (size / 2) - (strokeWidth / 2);
-                canvas.StrokeSize = strokeWidth;
-                canvas.StrokeLineCap = LineCap.Round;
-
-                var arcRect = new RectF(
-                    dirtyRect.Left + strokeWidth / 2,
-                    dirtyRect.Top + strokeWidth / 2,
-                    size - strokeWidth,
-                    size - strokeWidth
-                );
-
-                // 1. Always draw the full gray circle as background
-                canvas.StrokeColor = TrackColor;
-                canvas.DrawCircle(dirtyRect.Center.X, dirtyRect.Center.Y, radius);
-
-                // 2. Draw green arc on top based on progress
-                if (Progress > 0)
-                {
-                    float clampedProgress = Math.Min(Progress, 1.0f); // Clamp to prevent overdraw
-                    float progressAngle = 360f * clampedProgress;
-
-                    canvas.StrokeColor = ProgressColor;
-                    canvas.DrawArc(arcRect, 90f, progressAngle, false, false);
-                }
-
-                canvas.RestoreState();
+            // Animate the progress fill width
+            if (animate && !isLiveUpdating) // Don't animate during live updates
+            {
+                await ProgressFill.LayoutTo(new Rect(0, 0, targetWidth, 30), 300, Easing.CubicOut);
+            }
+            else
+            {
+                // Direct update for live timer
+                ProgressFill.WidthRequest = targetWidth;
             }
         }
     }

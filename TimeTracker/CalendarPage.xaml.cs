@@ -1,4 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
 using System.Text.Json;
+using TimeTracker.Helpers;
 
 namespace TimeTracker
 {
@@ -6,13 +8,20 @@ namespace TimeTracker
     {
         private Dictionary<DateTime, TimeSpan> dailyTotals = new();
         private string storagePath => Path.Combine(FileSystem.AppDataDirectory, "swipes.json");
-
+        private TimeSpan RequiredTime => TimeSpan.FromHours(
+            Preferences.Get("OfficeHoursGoal", 5.0)
+        );
         // 1. Add a state variable to track the current month and year
         private DateTime _currentDate;
 
         public CalendarPage()
         {
             InitializeComponent();
+            WeakReferenceMessenger.Default.Register<OfficeHoursUpdatedMessage>(this, async (r, message) =>
+            {
+                LoadSwipeData(); // Recalculate data
+                BuildCalendar(_currentDate.Year, _currentDate.Month); // Rebuild calendar with new colors
+            });
             LoadSwipeData();
 
             // 2. Initialize the date to today and build the initial calendar
@@ -134,16 +143,19 @@ namespace TimeTracker
         {
             if (dailyTotals.TryGetValue(date.Date, out var duration))
             {
-                if (duration.TotalHours >= 5)
-                    return Colors.LightGreen;
-                else if (duration.TotalHours >= 4)
-                    return Colors.Khaki;
-                else
-                    return Colors.IndianRed;
-            }
-            return Colors.LightGray; // Use LightGray for better visibility than Transparent
-        }
+                // Use dynamic RequiredTime instead of hardcoded 5 hours
+                var requiredHours = RequiredTime.TotalHours;
+                var actualHours = duration.TotalHours;
 
+                if (actualHours >= requiredHours)
+                    return Colors.LightGreen;
+                else if (actualHours > 0)
+                    return Colors.IndianRed;
+                else
+                    return Colors.LightGray;
+            }
+            return Colors.LightGray;
+        }
         private void ShowDayDetails(DateTime date)
         {
             SelectedDateLabel.Text = $"Details for {date:dd MMM yyyy}";
@@ -223,6 +235,11 @@ namespace TimeTracker
             BuildCalendar(_currentDate.Year, _currentDate.Month);
             SelectedDateLabel.Text = "";
             DaySessionsCollection.ItemsSource = null;
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
         }
     }
 }
