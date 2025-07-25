@@ -1,6 +1,7 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using System.Text.Json;
 using TimeTracker.Helpers;
+using System.Linq;
 
 namespace TimeTracker
 {
@@ -8,20 +9,27 @@ namespace TimeTracker
     {
         private Dictionary<DateTime, TimeSpan> dailyTotals = new();
         private string storagePath => Path.Combine(FileSystem.AppDataDirectory, "swipes.json");
+        private HashSet<DateTime> forgottenCheckoutDates = new();
+
+        // Dynamic office hours goal from preferences (same as MainPage)
         private TimeSpan RequiredTime => TimeSpan.FromHours(
             Preferences.Get("OfficeHoursGoal", 5.0)
         );
+
         // 1. Add a state variable to track the current month and year
         private DateTime _currentDate;
 
         public CalendarPage()
         {
             InitializeComponent();
+
+            // Subscribe to office hours updates (same as MainPage)
             WeakReferenceMessenger.Default.Register<OfficeHoursUpdatedMessage>(this, async (r, message) =>
             {
                 LoadSwipeData(); // Recalculate data
                 BuildCalendar(_currentDate.Year, _currentDate.Month); // Rebuild calendar with new colors
             });
+
             LoadSwipeData();
 
             // 2. Initialize the date to today and build the initial calendar
@@ -29,43 +37,61 @@ namespace TimeTracker
             BuildCalendar(_currentDate.Year, _currentDate.Month);
         }
 
+        // Add a dictionary to track days with incomplete sessions
+        private HashSet<DateTime> incompleteDays = new();
+
         private void LoadSwipeData()
         {
             if (!File.Exists(storagePath))
                 return;
 
             var json = File.ReadAllText(storagePath);
-            var swipes = JsonSerializer.Deserialize<List<DateTime>>(json) ?? new();
+            var allSwipes = JsonSerializer.Deserialize<List<DateTime>>(json) ?? new();
 
+            // Clear previous calculations
             dailyTotals.Clear();
+            incompleteDays.Clear();
 
-            for (int i = 0; i < swipes.Count; i += 2)
+            // Group all swipes by their date to process each day individually
+            var swipesByDay = allSwipes
+                .GroupBy(swipe => swipe.Date)
+                .ToDictionary(group => group.Key, group => group.OrderBy(swipe => swipe).ToList());
+
+            // Process each day's data
+            foreach (var dayEntry in swipesByDay)
             {
-                var inTime = swipes[i];
+                var date = dayEntry.Key;
+                var daySwipes = dayEntry.Value;
+                var totalDurationForDay = TimeSpan.Zero;
 
-                if (i + 1 < swipes.Count)
+                // Process all COMPLETE pairs of swipes for the day
+                for (int i = 0; i < daySwipes.Count - 1; i += 2)
                 {
-                    // Complete session (has OUT swipe)
-                    var outTime = swipes[i + 1];
-
-                    if (inTime.Date != outTime.Date) continue;
-
-                    if (!dailyTotals.ContainsKey(inTime.Date))
-                        dailyTotals[inTime.Date] = TimeSpan.Zero;
-
-                    dailyTotals[inTime.Date] += outTime - inTime;
+                    totalDurationForDay += daySwipes[i + 1] - daySwipes[i];
                 }
-                else
+
+                // NOW, check if the day is incomplete (an odd number of swipes)
+                if (daySwipes.Count % 2 != 0)
                 {
-                    // Active session (no OUT swipe yet)
-                    var currentTime = DateTime.Now;
-                    var activeDuration = currentTime - inTime;
+                    // This day is incomplete, so add it to the set for the yellow color
+                    incompleteDays.Add(date);
+                    var lastInTime = daySwipes.Last(); // The unpaired swipe
 
-                    if (!dailyTotals.ContainsKey(inTime.Date))
-                        dailyTotals[inTime.Date] = TimeSpan.Zero;
-
-                    dailyTotals[inTime.Date] += activeDuration;
+                    if (date.Date < DateTime.Today)
+                    {
+                        // Forgotten logout from a previous day - cap at midnight
+                        var endOfDay = date.Date.AddDays(1).AddTicks(-1);
+                        totalDurationForDay += endOfDay - lastInTime;
+                    }
+                    else
+                    {
+                        // Active session for today
+                        totalDurationForDay += DateTime.Now - lastInTime;
+                    }
                 }
+
+                // Store the final calculated total for the day
+                dailyTotals[date] = totalDurationForDay;
             }
         }
 
@@ -141,21 +167,23 @@ namespace TimeTracker
 
         private Color GetDayColor(DateTime date)
         {
-            if (dailyTotals.TryGetValue(date.Date, out var duration))
+            // Rule 1: If the day has no final logout, it's always yellow.
+            if (incompleteDays.Contains(date.Date))
             {
-                // Use dynamic RequiredTime instead of hardcoded 5 hours
-                var requiredHours = RequiredTime.TotalHours;
-                var actualHours = duration.TotalHours;
-
-                if (actualHours >= requiredHours)
-                    return Colors.LightGreen;
-                else if (actualHours > 0)
-                    return Colors.IndianRed;
-                else
-                    return Colors.LightGray;
+                return Color.FromArgb("#DFC037");
             }
+
+            // Check completed days
+            if (dailyTotals.TryGetValue(date.Date, out var duration) && duration > TimeSpan.Zero)
+            {
+                // Rule 2 & 3: Is the goal met for this completed day?
+                return duration >= RequiredTime ? Colors.LightGreen : Colors.IndianRed;
+            }
+
+            // Default for days with no data
             return Colors.LightGray;
         }
+
         private void ShowDayDetails(DateTime date)
         {
             SelectedDateLabel.Text = $"Details for {date:dd MMM yyyy}";
@@ -169,48 +197,72 @@ namespace TimeTracker
             var swipes = JsonSerializer.Deserialize<List<DateTime>>(File.ReadAllText(storagePath)) ?? new();
             var sessionItems = new List<SessionItem>();
             TimeSpan totalForDay = TimeSpan.Zero;
-
-            for (int i = 0; i < swipes.Count; i += 2)
+            var daySwipes = swipes.Where(s => s.Date == date.Date).OrderBy(s => s).ToList();
+            for (int i = 0; i < daySwipes.Count; i += 2)
             {
-                if (swipes[i].Date != date.Date)
-                    continue;
-
-                var inTime = swipes[i];
-                DateTime? outTime = (i + 1 < swipes.Count && swipes[i + 1].Date == date.Date) ? swipes[i + 1] : null;
-
-                if (outTime.HasValue)
+                var inTime = daySwipes[i];
+                if (i + 1 < daySwipes.Count)
                 {
-                    var duration = outTime.Value - inTime;
+                    var outTime = daySwipes[i + 1];
+                    var duration = outTime - inTime;
                     sessionItems.Add(new SessionItem
                     {
-                        TimeRange = $"IN: {inTime:hh:mm tt}   OUT: {outTime.Value:hh:mm tt}",
+                        TimeRange = $"IN: {inTime:hh:mm tt}   OUT: {outTime:hh:mm tt}",
                         Duration = $"Duration: {(int)duration.TotalHours}h {duration.Minutes}m"
                     });
                     totalForDay += duration;
                 }
-                else
+                else // This is the last, unpaired swipe
                 {
-                    // For active sessions, calculate time from IN to current time
-                    var currentTime = DateTime.Now;
-                    var activeDuration = currentTime - inTime;
-
+                    string timeRangeText;
+                    string durationText;
+                    TimeSpan activeDuration;
+                    if (date.Date < DateTime.Today)
+                    {
+                        // Forgotten logout from a past day
+                        activeDuration = date.AddDays(1).AddTicks(-1) - inTime;
+                        timeRangeText = $"IN: {inTime:hh:mm tt}   OUT: -- (Forgot)";
+                        durationText = $"Capped at Midnight: {(int)activeDuration.TotalHours}h {activeDuration.Minutes}m";
+                    }
+                    else
+                    {
+                        // Active session for today
+                        activeDuration = DateTime.Now - inTime;
+                        timeRangeText = $"IN: {inTime:hh:mm tt}   OUT: --";
+                        durationText = $"Currently Inside: {(int)activeDuration.TotalHours}h {activeDuration.Minutes}m";
+                    }
                     sessionItems.Add(new SessionItem
                     {
-                        TimeRange = $"IN: {inTime:hh:mm tt}   OUT: --",
-                        Duration = $"Currently Inside ({(int)activeDuration.TotalHours}h {activeDuration.Minutes}m)"
+                        TimeRange = timeRangeText,
+                        Duration = durationText
                     });
-
-                    // Add the active session time to total
                     totalForDay += activeDuration;
                 }
             }
 
             DaySessionsCollection.ItemsSource = sessionItems;
+            string statusText;
 
-            // Update total time in header label
-            SelectedDateLabel.Text = $"Details for {date:dd MMM yyyy} | Total: {(int)totalForDay.TotalHours}h {totalForDay.Minutes}m";
+            // Check if the day is marked as incomplete by LoadSwipeData method
+            if (incompleteDays.Contains(date.Date))
+            {
+                statusText = "❗ Incomplete (No Logout)";
+            }
+            else
+            {
+                if (totalForDay == TimeSpan.Zero)
+                {
+                    statusText = "No time recorded";
+                }
+                else
+                {
+                    statusText = totalForDay >= RequiredTime ? "✅ Goal Met" : "❌ Goal Not Met";
+                }
+            }
+
+            // Update total time in header label with the correct status
+            SelectedDateLabel.Text = $"Details for {date:dd MMM yyyy} | Total: {(int)totalForDay.TotalHours}h {totalForDay.Minutes}m | {statusText}";
         }
-
 
         // Helper class
         private class SessionItem
@@ -218,7 +270,6 @@ namespace TimeTracker
             public string? TimeRange { get; set; }
             public string? Duration { get; set; }
         }
-
 
         // 4. Add the event handlers for the navigation buttons
         private void PreviousMonth_Clicked(object sender, EventArgs e)
@@ -243,4 +294,3 @@ namespace TimeTracker
         }
     }
 }
-
