@@ -25,6 +25,24 @@ namespace TimeTracker
             {
                 await UpdateUI();
             });
+            WeakReferenceMessenger.Default.Register<LogsClearedMessage>(this, async (r, message) =>
+            {
+                LoadSwipeData();
+                await UpdateUI();
+
+                // If today's data was cleared, we might need to stop the timer
+                if (message.Year == DateTime.Today.Year && message.Month == DateTime.Today.Month)
+                {
+                    StopLiveTimer();
+                }
+            });
+
+            WeakReferenceMessenger.Default.Register<AllLogsClearedMessage>(this, async (r, message) =>
+            {
+                LoadSwipeData();
+                await UpdateUI();
+                StopLiveTimer();
+            });
             LoadSwipeData();
             MainThread.InvokeOnMainThreadAsync(async () => await UpdateUI());
 
@@ -35,7 +53,7 @@ namespace TimeTracker
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await UpdateUI(); // This will refresh every time the page appears
+            await UpdateUI();
         }
 
         private async void OnSwipeAction(object sender, EventArgs e)
@@ -154,6 +172,13 @@ namespace TimeTracker
                 LastActionTimeLabel.Text = $"Time: {lastTime:hh:mm tt}";
                 LastActionDateLabel.Text = $"Date: {lastTime:dd MMM yyyy}";
             }
+            else
+            {
+                // Clear the last action info when no data exists
+                LastActionLabel.Text = "No previous actions";
+                LastActionTimeLabel.Text = "";
+                LastActionDateLabel.Text = "";
+            }
 
             // Populate Today Log using the same logic as CalendarPage
             var todayLogs = new List<SwipeLogItem>();
@@ -223,6 +248,10 @@ namespace TimeTracker
             {
                 string json = File.ReadAllText(storagePath);
                 swipeTimes = JsonSerializer.Deserialize<List<DateTime>>(json) ?? new();
+            }
+            else
+            {
+                swipeTimes = new();
             }
         }
 

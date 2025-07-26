@@ -11,12 +11,10 @@ namespace TimeTracker
         private string storagePath => Path.Combine(FileSystem.AppDataDirectory, "swipes.json");
         private HashSet<DateTime> forgottenCheckoutDates = new();
 
-        // Dynamic office hours goal from preferences (same as MainPage)
         private TimeSpan RequiredTime => TimeSpan.FromHours(
             Preferences.Get("OfficeHoursGoal", 5.0)
         );
 
-        // 1. Add a state variable to track the current month and year
         private DateTime _currentDate;
 
         public CalendarPage()
@@ -29,7 +27,26 @@ namespace TimeTracker
                 LoadSwipeData(); // Recalculate data
                 BuildCalendar(_currentDate.Year, _currentDate.Month); // Rebuild calendar with new colors
             });
+            WeakReferenceMessenger.Default.Register<LogsClearedMessage>(this, async (r, message) =>
+            {
+                LoadSwipeData(); // Reload all data from file
+                BuildCalendar(_currentDate.Year, _currentDate.Month); // Rebuild calendar
 
+                // Clear selected day details if viewing the cleared month
+                if (_currentDate.Year == message.Year && _currentDate.Month == message.Month)
+                {
+                    SelectedDateLabel.Text = "";
+                    DaySessionsCollection.ItemsSource = null;
+                }
+            });
+
+            WeakReferenceMessenger.Default.Register<AllLogsClearedMessage>(this, async (r, message) =>
+            {
+                LoadSwipeData(); // Reload all data (will be empty)
+                BuildCalendar(_currentDate.Year, _currentDate.Month); // Rebuild calendar
+                SelectedDateLabel.Text = "";
+                DaySessionsCollection.ItemsSource = null;
+            });
             LoadSwipeData();
 
             // 2. Initialize the date to today and build the initial calendar
@@ -42,15 +59,14 @@ namespace TimeTracker
 
         private void LoadSwipeData()
         {
+            dailyTotals.Clear();
+            incompleteDays.Clear();
+
             if (!File.Exists(storagePath))
                 return;
 
             var json = File.ReadAllText(storagePath);
             var allSwipes = JsonSerializer.Deserialize<List<DateTime>>(json) ?? new();
-
-            // Clear previous calculations
-            dailyTotals.Clear();
-            incompleteDays.Clear();
 
             // Group all swipes by their date to process each day individually
             var swipesByDay = allSwipes
