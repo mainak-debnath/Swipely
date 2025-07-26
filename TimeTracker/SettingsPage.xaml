@@ -1,58 +1,443 @@
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TimeTracker.SettingsPage"
              Title="Settings"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
-
-    <ScrollView>
+    <Grid>
+        <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="24">
 
+            <!-- Header -->
             <Label Text="Settings"
-                   FontSize="26"
+                   FontSize="32"
                    FontAttributes="Bold"
                    TextColor="{DynamicResource PrimaryTextColor}"
-                   HorizontalOptions="Center" />
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,10" />
 
-            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}"
-                   CornerRadius="12"
-                   Padding="20"
-                   HasShadow="True">
-                <VerticalStackLayout Spacing="16">
+            <!-- Office Hour Goal Section -->
+            <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+                    StrokeThickness="0"
+                    Stroke="Transparent">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16" />
+                </Border.StrokeShape>
+                <Border.Content>
+                    <VerticalStackLayout Spacing="20" Margin="24">
+                        <Label Text="Daily Office Hours Goal"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{DynamicResource PrimaryTextColor}" />
 
-                    <Label Text="Set Daily Office Hour Goal"
-       FontSize="18"
-       TextColor="{DynamicResource PrimaryTextColor}" />
+                        <HorizontalStackLayout Spacing="16" VerticalOptions="Center">
+                            <Label Text="Target Hours:"
+                               FontSize="16"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               VerticalOptions="Center" />
 
-                    <Label Text="Hours:"
-       VerticalOptions="Center"
-       TextColor="{DynamicResource PrimaryTextColor}" />
+                            <Border BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                                StrokeThickness="1"
+                                Stroke="#CCCCCC">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Entry x:Name="HoursEntry"
+                                   WidthRequest="80"
+                                   HeightRequest="40"
+                                   Keyboard="Numeric"
+                                   Placeholder="8.0"
+                                   BackgroundColor="Transparent"
+                                   TextColor="{DynamicResource PrimaryTextColor}"
+                                   PlaceholderColor="#888888"
+                                   HorizontalTextAlignment="Center"
+                                   FontSize="16" />
+                            </Border>
+                        </HorizontalStackLayout>
 
-                    <Frame Padding="0"
-       CornerRadius="8"
-       BorderColor="{DynamicResource SecondaryTextColor}"
-       HasShadow="False"
-       HeightRequest="45"
-       BackgroundColor="{DynamicResource EntryBackgroundColor}">
-                        <Entry x:Name="HoursEntry"
-           Placeholder="5"
-           Keyboard="Numeric"
-           BackgroundColor="Transparent"
-           TextColor="{DynamicResource PrimaryTextColor}"
-           PlaceholderColor="{DynamicResource SecondaryTextColor}"
-           HorizontalTextAlignment="Center"
-           FontSize="16" />
-                    </Frame>
-
-
-                    <Button Text="Save"
+                        <Button Text="Save Changes"
                             Clicked="OnSaveClicked"
-                            BackgroundColor="{DynamicResource ButtonColor}"
+                            BackgroundColor="#007ACC"
                             TextColor="White"
                             FontAttributes="Bold"
-                            CornerRadius="8"
-                            HeightRequest="45" />
-                </VerticalStackLayout>
-            </Frame>
+                            CornerRadius="12"
+                            HeightRequest="48"
+                            FontSize="16" />
+                    </VerticalStackLayout>
+                </Border.Content>
+            </Border>
+
+            <!-- Data Management Section -->
+            <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+                    StrokeThickness="0"
+                    Stroke="Transparent">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16" />
+                </Border.StrokeShape>
+                <Border.Content>
+                    <VerticalStackLayout Spacing="20" Margin="24">
+                        <Label Text="Data Management"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{DynamicResource PrimaryTextColor}" />
+
+                        <Label Text="Clear time tracking data for specific periods or reset everything."
+                           FontSize="14"
+                           TextColor="{DynamicResource SecondaryTextColor}"
+                           LineHeight="1.4" />
+
+                        <Button Text="Clear Monthly Data"
+                            Clicked="OnClearMonthClicked"
+                            BackgroundColor="#FF8C00"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            CornerRadius="12"
+                            HeightRequest="48"
+                            FontSize="16" />
+
+                        <!-- Separator -->
+                        <BoxView HeightRequest="1" 
+                             BackgroundColor="{DynamicResource SecondaryTextColor}" 
+                             Opacity="0.2" 
+                             Margin="0,10" />
+
+                        <!-- Danger Zone Toggle -->
+                        <Frame BackgroundColor="Transparent" 
+                           Padding="0" 
+                           HasShadow="False">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnDangerZoneToggled" />
+                            </Frame.GestureRecognizers>
+
+                            <HorizontalStackLayout Spacing="12">
+                                <Label x:Name="DangerZoneIcon"
+                                   Text="▶"
+                                   FontSize="14"
+                                   TextColor="#DC143C"
+                                   VerticalOptions="Center" />
+                                <Label Text="Advanced Options"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#DC143C"
+                                   VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Frame>
+
+                        <!-- Collapsible Danger Zone -->
+                        <VerticalStackLayout x:Name="DangerZoneContent" 
+                                         IsVisible="False" 
+                                         Spacing="16">
+
+                            <Border BackgroundColor="#FFF5F5"
+                                    StrokeThickness="1"
+                                    Stroke="#FFE4E1">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Border.Content>
+                                    <VerticalStackLayout Spacing="12" Margin="16">
+                                        <Label Text="Danger Zone"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#DC143C" />
+
+                                        <Label Text="This action will permanently delete all your time tracking data and cannot be undone."
+                                       FontSize="14"
+                                       TextColor="#8B0000"
+                                       LineHeight="1.4" />
+
+                                        <Button Text="Delete All Data"
+                                        Clicked="OnClearAllClicked"
+                                        BackgroundColor="#DC143C"
+                                        TextColor="White"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        HeightRequest="44"
+                                        FontSize="15" />
+                                    </VerticalStackLayout>
+                                </Border.Content>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border.Content>
+            </Border>
+
         </VerticalStackLayout>
     </ScrollView>
+
+    <!-- Month Selection Modal -->
+    <Grid x:Name="MonthSelectionOverlay" 
+          IsVisible="False"
+          BackgroundColor="#80000000">
+
+        <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+                WidthRequest="340"
+                HeightRequest="480"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                StrokeThickness="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="16" />
+            </Border.StrokeShape>
+            <Border.Content>
+                <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+                    <!-- Header -->
+                    <VerticalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,20">
+                        <Label Text="Select Month to Clear"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="{DynamicResource PrimaryTextColor}"
+                           HorizontalOptions="Center" />
+                        <Label Text="Choose the month you want to clear data for"
+                           FontSize="14"
+                           TextColor="{DynamicResource SecondaryTextColor}"
+                           HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+
+                    <!-- Calendar -->
+                    <ScrollView Grid.Row="1">
+                        <VerticalStackLayout x:Name="MonthsContainer" Spacing="4" />
+                    </ScrollView>
+
+                    <!-- Buttons -->
+                    <HorizontalStackLayout Grid.Row="2" 
+                                       Spacing="12" 
+                                       HorizontalOptions="Center"
+                                       Margin="0,20,0,0">
+                        <Button Text="Cancel"
+                            Clicked="OnCancelMonthSelection"
+                            BackgroundColor="Transparent"
+                            TextColor="{DynamicResource SecondaryTextColor}"
+                            BorderColor="{DynamicResource SecondaryTextColor}"
+                            BorderWidth="1"
+                            CornerRadius="8"
+                            WidthRequest="120"
+                            HeightRequest="44" />
+
+                            <Button x:Name="ConfirmClearButton"
+                                    Text="Clear Data"
+                                    Clicked="OnConfirmClearMonth"
+                                    IsEnabled="False"
+                                    BackgroundColor="{Binding Source={x:Reference ConfirmClearButton}, Path=IsEnabled, Converter={StaticResource EnabledToColorConverter}}"
+                                    TextColor="{Binding Source={x:Reference ConfirmClearButton}, Path=IsEnabled, Converter={StaticResource EnabledToTextColorConverter}}"
+                                    FontAttributes="Bold"
+                                    CornerRadius="8"
+                                    WidthRequest="120"
+                                    HeightRequest="44" />
+                        </HorizontalStackLayout>
+                </Grid>
+            </Border.Content>
+        </Border>
+    </Grid>
+
+    <!-- Delete Month Confirmation Modal -->
+    <Grid x:Name="DeleteMonthOverlay" 
+          IsVisible="False"
+          BackgroundColor="#80000000">
+
+        <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+                WidthRequest="360"
+                HeightRequest="340"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                StrokeThickness="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="20" />
+            </Border.StrokeShape>
+            <Border.Content>
+                <Grid RowDefinitions="Auto,*,Auto" Margin="28,28,28,24">
+
+                    <!-- Warning Icon and Title -->
+                    <VerticalStackLayout Grid.Row="0" Spacing="12" HorizontalOptions="Center">
+                        <Border BackgroundColor="#FFF3CD"
+                                WidthRequest="56"
+                                HeightRequest="56"
+                                HorizontalOptions="Center"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="28" />
+                            </Border.StrokeShape>
+                            <Border.Content>
+                                <Label Text="⚠"
+                                       FontSize="24"
+                                       TextColor="#FF8C00"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border.Content>
+                        </Border>
+
+                        <Label Text="Delete Month Data?"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+
+                    <!-- Warning Message -->
+                    <VerticalStackLayout Grid.Row="1" 
+                                         Spacing="8" 
+                                         VerticalOptions="Center"
+                                         Margin="0,16,0,16">
+                        <Label x:Name="DeleteMonthMessage"
+                               Text="Are you sure you want to permanently delete all time tracking data for [Month]?"
+                               FontSize="15"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               HorizontalTextAlignment="Center"
+                               LineHeight="1.3" />
+
+                        <Label Text="This action cannot be undone."
+                               FontSize="13"
+                               FontAttributes="Bold"
+                               TextColor="#FF8C00"
+                               HorizontalOptions="Center"
+                               Margin="0,6,0,0" />
+                    </VerticalStackLayout>
+
+                    <!-- Action Buttons -->
+                    <HorizontalStackLayout Grid.Row="2" 
+                                           Spacing="12" 
+                                           HorizontalOptions="Center">
+                        <Button Text="Cancel"
+                                Clicked="OnCancelDeleteMonth"
+                                BackgroundColor="Transparent"
+                                TextColor="{DynamicResource SecondaryTextColor}"
+                                BorderColor="{DynamicResource SecondaryTextColor}"
+                                BorderWidth="1"
+                                CornerRadius="10"
+                                WidthRequest="120"
+                                HeightRequest="44"
+                                FontSize="15"
+                                FontAttributes="Bold" />
+
+                        <Button Text="Delete"
+                                Clicked="OnFinalConfirmDeleteMonth"
+                                BackgroundColor="#FF8C00"
+                                TextColor="White"
+                                CornerRadius="10"
+                                WidthRequest="120"
+                                HeightRequest="44"
+                                FontSize="15"
+                                FontAttributes="Bold" />
+                    </HorizontalStackLayout>
+                </Grid>
+            </Border.Content>
+        </Border>
+    </Grid>
+
+    <!-- Delete All Confirmation Modal -->
+    <Grid x:Name="DeleteAllOverlay" 
+          IsVisible="False"
+          BackgroundColor="#80000000">
+
+        <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+                WidthRequest="380"
+                HeightRequest="400"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                StrokeThickness="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="20" />
+            </Border.StrokeShape>
+            <Border.Content>
+                <Grid RowDefinitions="Auto,*,Auto" Margin="32,32,32,24">
+
+                    <!-- Warning Icon and Title -->
+                    <VerticalStackLayout Grid.Row="0" Spacing="16" HorizontalOptions="Center">
+                        <Border BackgroundColor="#FFE4E1"
+                                WidthRequest="64"
+                                HeightRequest="64"
+                                HorizontalOptions="Center"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="32" />
+                            </Border.StrokeShape>
+                            <Border.Content>
+                                <Label Text="⚠"
+                                       FontSize="28"
+                                       TextColor="#DC143C"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border.Content>
+                        </Border>
+
+                        <Label Text="Delete All Data?"
+                               FontSize="22"
+                               FontAttributes="Bold"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+
+                    <!-- Warning Message -->
+                        <VerticalStackLayout Grid.Row="1" 
+                                             Margin="0,20,0,20"
+                                             Spacing="12"
+                                             VerticalOptions="Center">
+                            <Label Text="This action will permanently delete:"
+                                   FontSize="16"
+                                   TextColor="{DynamicResource PrimaryTextColor}"
+                                   HorizontalOptions="Center" />
+
+                            <VerticalStackLayout Spacing="6">
+                                <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                                    <Label Text="•" TextColor="#DC143C" FontSize="16" />
+                                    <Label Text="All time tracking records" 
+                                           FontSize="14" 
+                                           TextColor="{DynamicResource SecondaryTextColor}" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Spacing="6" HorizontalOptions="Center">
+                                    <Label Text="•" TextColor="#DC143C" FontSize="16" />
+                                    <Label Text="Historical data and statistics" 
+                                           FontSize="14" 
+                                           TextColor="{DynamicResource SecondaryTextColor}" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Spacing="6" HorizontalOptions="Center">
+                                    <Label Text="•" TextColor="#DC143C" FontSize="16" />
+                                    <Label Text="All calendar entries" 
+                                           FontSize="14" 
+                                           TextColor="{DynamicResource SecondaryTextColor}" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <Label Text="This action cannot be undone."
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="#DC143C"
+                                   HorizontalOptions="Center"
+                                   Margin="0,4,0,0" />
+                        </VerticalStackLayout>
+
+
+                        <!-- Action Buttons -->
+                    <HorizontalStackLayout Grid.Row="2" 
+                                           Spacing="16" 
+                                           HorizontalOptions="Center">
+                        <Button Text="Cancel"
+                                Clicked="OnCancelDeleteAll"
+                                BackgroundColor="Transparent"
+                                TextColor="{DynamicResource SecondaryTextColor}"
+                                BorderColor="{DynamicResource SecondaryTextColor}"
+                                BorderWidth="1"
+                                CornerRadius="12"
+                                WidthRequest="140"
+                                HeightRequest="48"
+                                FontSize="16"
+                                FontAttributes="Bold" />
+
+                        <Button Text="Delete All"
+                                Clicked="OnConfirmDeleteAll"
+                                BackgroundColor="#DC143C"
+                                TextColor="White"
+                                CornerRadius="12"
+                                WidthRequest="140"
+                                HeightRequest="48"
+                                FontSize="16"
+                                FontAttributes="Bold" />
+                    </HorizontalStackLayout>
+                </Grid>
+            </Border.Content>
+        </Border>
+    </Grid>
+    </Grid>
 </ContentPage>

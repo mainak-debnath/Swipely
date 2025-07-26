@@ -4,13 +4,18 @@
              Title="Calendar">
     <ScrollView>
         <VerticalStackLayout Padding="10">
-            <Label Text="Swipe Log Calendar" FontSize="20" HorizontalOptions="Center" />
+            <Label Text="Swipe log calendar"
+                   FontSize="32"
+                   FontAttributes="Bold"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,10" />
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="20" Margin="0,10,0,10">
                 <Button Text="&lt;" Clicked="PreviousMonth_Clicked" />
                 <Label x:Name="MonthYearLabel"
-           FontSize="18"
-           FontAttributes="Bold"
-           VerticalOptions="Center"/>
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"/>
                 <Button Text="&gt;" Clicked="NextMonth_Clicked" />
             </HorizontalStackLayout>
             <Grid x:Name="CalendarGrid" RowSpacing="2" ColumnSpacing="2">
