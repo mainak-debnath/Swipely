@@ -304,6 +304,13 @@ namespace TimeTracker
             DaySessionsCollection.ItemsSource = null;
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            LoadSwipeData();
+            BuildCalendar(_currentDate.Year, _currentDate.Month);
+        }
+
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
