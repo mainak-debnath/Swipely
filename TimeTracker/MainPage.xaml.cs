@@ -59,8 +59,8 @@ namespace TimeTracker
         private async void OnSwipeAction(object sender, EventArgs e)
         {
             swipeTimes.Add(DateTime.Now);
-            SaveSwipeData();
             await UpdateUI();
+            await SaveSwipeDataAsync();
         }
 
         private async void ToggleLogsButton_Clicked(object sender, EventArgs e)
@@ -94,115 +94,125 @@ namespace TimeTracker
 
         private async Task UpdateUI()
         {
+            if (isLiveUpdating) return;
+
+            isLiveUpdating = true;
             // Use ALL swipes to determine if inside (original logic was correct)
-            bool isInside = swipeTimes.Count % 2 != 0;
-
-            // Calculate today's total time using the SAME logic as CalendarPage
-            var today = DateTime.Today;
-            TimeSpan totalInside = TimeSpan.Zero;
-            bool hasActiveSessionToday = false;
-
-            // Process swipes in pairs, just like CalendarPage
-            for (int i = 0; i < swipeTimes.Count; i += 2)
+            try
             {
-                var inTime = swipeTimes[i];
+                bool isInside = swipeTimes.Count % 2 != 0;
 
-                // Skip if not today
-                if (inTime.Date != today) continue;
+                // Calculate today's total time using the SAME logic as CalendarPage
+                var today = DateTime.Today;
+                TimeSpan totalInside = TimeSpan.Zero;
+                bool hasActiveSessionToday = false;
 
-                if (i + 1 < swipeTimes.Count)
+                // Process swipes in pairs, just like CalendarPage
+                for (int i = 0; i < swipeTimes.Count; i += 2)
                 {
-                    // Complete session (has OUT swipe)
-                    var outTime = swipeTimes[i + 1];
+                    var inTime = swipeTimes[i];
 
-                    // Make sure OUT is also today
-                    if (outTime.Date == today)
+                    // Skip if not today
+                    if (inTime.Date != today) continue;
+
+                    if (i + 1 < swipeTimes.Count)
                     {
-                        totalInside += outTime - inTime;
+                        // Complete session (has OUT swipe)
+                        var outTime = swipeTimes[i + 1];
+
+                        // Make sure OUT is also today
+                        if (outTime.Date == today)
+                        {
+                            totalInside += outTime - inTime;
+                        }
                     }
+                    else
+                    {
+                        // Active session (no OUT swipe yet) - this means we're currently inside
+                        var currentTime = DateTime.Now;
+                        var activeDuration = currentTime - inTime;
+                        totalInside += activeDuration;
+                        hasActiveSessionToday = true;
+                    }
+                }
+
+                // Start/stop timer based on whether we have an active session TODAY
+                if (hasActiveSessionToday)
+                {
+                    StartLiveTimer();
                 }
                 else
                 {
-                    // Active session (no OUT swipe yet) - this means we're currently inside
-                    var currentTime = DateTime.Now;
-                    var activeDuration = currentTime - inTime;
-                    totalInside += activeDuration;
-                    hasActiveSessionToday = true;
+                    StopLiveTimer();
                 }
-            }
 
-            // Start/stop timer based on whether we have an active session TODAY
-            if (hasActiveSessionToday)
-            {
-                StartLiveTimer();
-            }
-            else
-            {
-                StopLiveTimer();
-            }
+                await UpdateLinearProgress(totalInside, hasActiveSessionToday);
 
-            await UpdateLinearProgress(totalInside, hasActiveSessionToday);
+                // Calculate Time Left
+                var timeLeft = RequiredTime - totalInside;
+                if (timeLeft < TimeSpan.Zero) timeLeft = TimeSpan.Zero;
 
-            // Calculate Time Left
-            var timeLeft = RequiredTime - totalInside;
-            if (timeLeft < TimeSpan.Zero) timeLeft = TimeSpan.Zero;
+                // Update UI Elements
+                StatusLabel.Text = isInside ? "🟢 Currently IN" : "🔴 Currently OUT";
+                ((Frame)StatusLabel.Parent).BackgroundColor = isInside ? Colors.LightGreen : Colors.IndianRed;
 
-            // Update UI Elements
-            StatusLabel.Text = isInside ? "🟢 Currently IN" : "🔴 Currently OUT";
-            ((Frame)StatusLabel.Parent).BackgroundColor = isInside ? Colors.LightGreen : Colors.IndianRed;
+                // Time Left Message
+                if (!isInside)
+                    TimeLeftLabel.Text = "Ready for your next session!";
+                else if (totalInside >= RequiredTime)
+                    TimeLeftLabel.Text = "Target Met!";
+                else
+                    TimeLeftLabel.Text = $"Time Left: {(int)timeLeft.TotalHours}h {timeLeft.Minutes}m";
+                TimeLeftLabel.TextColor = totalInside >= RequiredTime ? Colors.Green : Colors.DarkRed;
 
-            // Time Left Message
-            if (!isInside)
-                TimeLeftLabel.Text = "Ready for your next session!";
-            else if (totalInside >= RequiredTime)
-                TimeLeftLabel.Text = "Target Met!";
-            else
-                TimeLeftLabel.Text = $"Time Left: {(int)timeLeft.TotalHours}h {timeLeft.Minutes}m";
-            TimeLeftLabel.TextColor = totalInside >= RequiredTime ? Colors.Green : Colors.DarkRed;
+                // Swipe Button
+                SwipeActionButton.Text = isInside ? "Swipe OUT" : "Swipe IN";
+                SwipeActionButton.BackgroundColor = isInside ? Colors.Red : Colors.Green;
 
-            // Swipe Button
-            SwipeActionButton.Text = isInside ? "Swipe OUT" : "Swipe IN";
-            SwipeActionButton.BackgroundColor = isInside ? Colors.Red : Colors.Green;
-
-            // Last Action Info - use ALL swipes for last action (original logic)
-            if (swipeTimes.Any())
-            {
-                var lastTime = swipeTimes[^1];
-                LastActionLabel.Text = isInside ? "Last Action: Swipe IN" : "Last Action: Swipe OUT";
-                LastActionTimeLabel.Text = $"Time: {lastTime:hh:mm tt}";
-                LastActionDateLabel.Text = $"Date: {lastTime:dd MMM yyyy}";
-            }
-            else
-            {
-                // Clear the last action info when no data exists
-                LastActionLabel.Text = "No previous actions";
-                LastActionTimeLabel.Text = "";
-                LastActionDateLabel.Text = "";
-            }
-
-            // Populate Today Log using the same logic as CalendarPage
-            var todayLogs = new List<SwipeLogItem>();
-            for (int i = 0; i < swipeTimes.Count; i += 2)
-            {
-                var inTime = swipeTimes[i];
-                if (inTime.Date != today) continue;
-
-                var log = new SwipeLogItem { InTime = inTime };
-
-                if (i + 1 < swipeTimes.Count && swipeTimes[i + 1].Date == today)
+                // Last Action Info - use ALL swipes for last action (original logic)
+                if (swipeTimes.Any())
                 {
-                    log.OutTime = swipeTimes[i + 1];
+                    var lastTime = swipeTimes[^1];
+                    LastActionLabel.Text = isInside ? "Last Action: Swipe IN" : "Last Action: Swipe OUT";
+                    LastActionTimeLabel.Text = $"Time: {lastTime:hh:mm tt}";
+                    LastActionDateLabel.Text = $"Date: {lastTime:dd MMM yyyy}";
+                }
+                else
+                {
+                    // Clear the last action info when no data exists
+                    LastActionLabel.Text = "No previous actions";
+                    LastActionTimeLabel.Text = "";
+                    LastActionDateLabel.Text = "";
                 }
 
-                todayLogs.Add(log);
-            }
+                // Populate Today Log using the same logic as CalendarPage
+                var todayLogs = new List<SwipeLogItem>();
+                for (int i = 0; i < swipeTimes.Count; i += 2)
+                {
+                    var inTime = swipeTimes[i];
+                    if (inTime.Date != today) continue;
 
-            TodayLogCollection.ItemsSource = todayLogs.Select(log => new
+                    var log = new SwipeLogItem { InTime = inTime };
+
+                    if (i + 1 < swipeTimes.Count && swipeTimes[i + 1].Date == today)
+                    {
+                        log.OutTime = swipeTimes[i + 1];
+                    }
+
+                    todayLogs.Add(log);
+                }
+
+                TodayLogCollection.ItemsSource = todayLogs.Select(log => new
+                {
+                    In = $"IN: {log.InTime:hh:mm tt}",
+                    Out = log.OutTime.HasValue ? $"OUT: {log.OutTime:hh:mm tt} ({(log.OutTime.Value - log.InTime).Hours}h {(log.OutTime.Value - log.InTime).Minutes}m)" : "Currently Active",
+                    Label = log.OutTime.HasValue ? "" : "(Active)"
+                });
+            }
+            finally
             {
-                In = $"IN: {log.InTime:hh:mm tt}",
-                Out = log.OutTime.HasValue ? $"OUT: {log.OutTime:hh:mm tt} ({(log.OutTime.Value - log.InTime).Hours}h {(log.OutTime.Value - log.InTime).Minutes}m)" : "Currently Active",
-                Label = log.OutTime.HasValue ? "" : "(Active)"
-            });
+                isLiveUpdating = false;
+            }
         }
 
         private void StartLiveTimer()
@@ -237,9 +247,10 @@ namespace TimeTracker
             }
         }
 
-        private void SaveSwipeData()
+        private async Task SaveSwipeDataAsync()
         {
-            File.WriteAllText(storagePath, JsonSerializer.Serialize(swipeTimes));
+            var json = JsonSerializer.Serialize(swipeTimes);
+            await File.WriteAllTextAsync(storagePath, json);
         }
 
         private void LoadSwipeData()
