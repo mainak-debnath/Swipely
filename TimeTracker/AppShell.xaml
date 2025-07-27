@@ -9,7 +9,7 @@
     Title="TimeTracker">
 
     <Shell.FlyoutHeader>
-        <Grid HeightRequest="200">
+        <Grid HeightRequest="130">
             <Rectangle>
                 <Rectangle.Fill>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -19,20 +19,7 @@
                 </Rectangle.Fill>
             </Rectangle>
 
-            <StackLayout Padding="24,48,24,32" VerticalOptions="End">
-                <Frame x:Name="AppIcon"
-                       BackgroundColor="White" 
-                       CornerRadius="25" 
-                       HeightRequest="50" 
-                       WidthRequest="50"
-                       HasShadow="True"
-                       HorizontalOptions="Start"
-                       Margin="0,0,0,16">
-                    <Label Text="⏰" 
-                           FontSize="24" 
-                           HorizontalOptions="Center" 
-                           VerticalOptions="Center" />
-                </Frame>
+            <StackLayout Padding="24,48,24,32" VerticalOptions="Center">
                 <Label x:Name="AppTitle"
                        Text="Swipely"
                        FontSize="32"
