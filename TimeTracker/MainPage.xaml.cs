@@ -169,21 +169,22 @@ namespace TimeTracker
                 SwipeActionButton.Text = isInside ? "Swipe OUT" : "Swipe IN";
                 SwipeActionButton.BackgroundColor = isInside ? Colors.Red : Colors.Green;
 
-                // Last Action Info - use ALL swipes for last action (original logic)
-                if (swipeTimes.Any())
+                // Show last action ONLY for today's swipes
+                var lastTodaySwipe = swipeTimes.LastOrDefault(s => s.Date == today);
+
+                if (lastTodaySwipe != default)
                 {
-                    var lastTime = swipeTimes[^1];
                     LastActionLabel.Text = isInside ? "Last Action: Swipe IN" : "Last Action: Swipe OUT";
-                    LastActionTimeLabel.Text = $"Time: {lastTime:hh:mm tt}";
-                    LastActionDateLabel.Text = $"Date: {lastTime:dd MMM yyyy}";
+                    LastActionTimeLabel.Text = $"Time: {lastTodaySwipe:hh:mm tt}";
+                    LastActionDateLabel.Text = $"Date: {lastTodaySwipe:dd MMM yyyy}";
                 }
                 else
                 {
-                    // Clear the last action info when no data exists
                     LastActionLabel.Text = "No previous actions";
                     LastActionTimeLabel.Text = "";
                     LastActionDateLabel.Text = "";
                 }
+
 
                 // Populate Today Log using the same logic as CalendarPage
                 var todayLogs = new List<SwipeLogItem>();

@@ -41,48 +41,48 @@
             <VerticalStackLayout HorizontalOptions="Center" Spacing="15">
                 <!-- Time Display -->
                 <Label x:Name="ProgressTimeLabel" 
-           Text="0h 00m / 8h 00m"
-           FontSize="24" 
-           FontAttributes="Bold"
-           HorizontalOptions="Center" 
-           TextColor="#333" />
+                       Text="0h 00m / 8h 00m"
+                       FontSize="24" 
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" 
+                       TextColor="#333" />
 
                 <!-- Linear Progress Bar Container -->
                 <Frame CornerRadius="15" 
-           Padding="0" 
-           BackgroundColor="#E0E0E0" 
-           HeightRequest="30" 
-           WidthRequest="300"
-           HorizontalOptions="Center"
-           HasShadow="False">
+                       Padding="0" 
+                       BackgroundColor="#E0E0E0" 
+                       HeightRequest="30" 
+                       WidthRequest="300"
+                       HorizontalOptions="Center"
+                       HasShadow="False">
                     <Grid>
                         <!-- Progress Fill (Green part that grows) -->
                         <Frame x:Name="ProgressFill" 
-                   CornerRadius="15" 
-                   BackgroundColor="#4CAF50" 
-                   HorizontalOptions="Start" 
-                   WidthRequest="0" 
-                   HeightRequest="30" 
-                   Padding="0"
-                   HasShadow="False" />
+                               CornerRadius="15" 
+                               BackgroundColor="#4CAF50" 
+                               HorizontalOptions="Start" 
+                               WidthRequest="0" 
+                               HeightRequest="30" 
+                               Padding="0"
+                               HasShadow="False" />
 
                         <!-- Percentage Text Overlay -->
                         <Label x:Name="PercentageLabel" 
-                   Text="0%" 
-                   FontSize="14" 
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" 
-                   VerticalOptions="Center"
-                   TextColor="White" />
+                               Text="0%" 
+                               FontSize="14" 
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center"
+                               TextColor="White" />
                     </Grid>
                 </Frame>
 
                 <!-- Status Text -->
                 <Label x:Name="ProgressStatusLabel" 
-           Text="Ready to start!"
-           FontSize="16" 
-           HorizontalOptions="Center"
-           TextColor="Gray" />
+                       Text="Ready to start!"
+                       FontSize="16" 
+                       HorizontalOptions="Center"
+                       TextColor="Gray" />
             </VerticalStackLayout>
 
             <Label x:Name="TimeLeftLabel"
@@ -92,12 +92,12 @@
                    HorizontalOptions="Center" />
 
             <Button x:Name="SwipeActionButton"
-                Text="Swipe OUT"
-                FontSize="18"
-                TextColor="White"
-                HeightRequest="50"
-                CornerRadius="12"
-                HorizontalOptions="Fill">
+                    Text="Swipe OUT"
+                    FontSize="18"
+                    TextColor="White"
+                    HeightRequest="50"
+                    CornerRadius="12"
+                    HorizontalOptions="Fill">
 
             </Button>
 
