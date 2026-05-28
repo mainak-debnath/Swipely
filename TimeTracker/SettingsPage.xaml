@@ -169,6 +169,112 @@
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="16">
                         <VerticalStackLayout Spacing="4">
+                            <Label Text="Notifications"
+                                   FontSize="20"
+                                   FontAttributes="Bold" />
+                            <Label Text="Get a nudge when your target is done or a session runs unusually long."
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        </VerticalStackLayout>
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Goal reached"
+                                       FontSize="16"
+                                       FontAttributes="Bold" />
+                                <Label Text="Notify once per day when your required hours are complete."
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="1"
+                                    Padding="2"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="18" />
+                                </Border.StrokeShape>
+                                <Switch x:Name="GoalNotificationSwitch"
+                                        OnColor="{StaticResource Accent}"
+                                        ThumbColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource TextPrimaryDark}}"
+                                        Toggled="GoalNotificationSwitch_Toggled"
+                                        VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <BoxView HeightRequest="1"
+                                 Color="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}"
+                                 Opacity="0.8" />
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Long session reminder"
+                                       FontSize="16"
+                                       FontAttributes="Bold" />
+                                <Label Text="Useful when you forget to swipe out after leaving."
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="1"
+                                    Padding="2"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="18" />
+                                </Border.StrokeShape>
+                                <Switch x:Name="LongSessionNotificationSwitch"
+                                        OnColor="{StaticResource Accent}"
+                                        ThumbColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource TextPrimaryDark}}"
+                                        Toggled="LongSessionNotificationSwitch_Toggled"
+                                        VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <Grid x:Name="LongSessionReminderSettings"
+                              ColumnDefinitions="*,Auto,Auto"
+                              ColumnSpacing="10"
+                              VerticalOptions="Center">
+                            <Label x:Name="LongSessionReminderLabel"
+                                   Text="Remind after"
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
+                                   VerticalOptions="Center" />
+                            <Border x:Name="LongSessionHoursBorder"
+                                    Grid.Column="1"
+                                    WidthRequest="76"
+                                    HeightRequest="44"
+                                    Padding="0"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <Entry x:Name="LongSessionHoursEntry"
+                                       Keyboard="Numeric"
+                                       BackgroundColor="Transparent"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       Unfocused="LongSessionHoursEntry_Unfocused" />
+                            </Border>
+                            <Label x:Name="LongSessionHoursUnitLabel"
+                                   Grid.Column="2"
+                                   Text="hours"
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="20"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="24" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="16">
+                        <VerticalStackLayout Spacing="4">
                             <Label Text="Data management"
                                    FontSize="20"
                                    FontAttributes="Bold" />

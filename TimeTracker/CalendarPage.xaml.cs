@@ -8,6 +8,7 @@ public partial class CalendarPage : ContentPage
 {
     private TrackingSnapshot? snapshot;
     private DateTime currentDate = DateTime.Today;
+    private DateTime? selectedDate;
 
     public CalendarPage()
     {
@@ -82,20 +83,36 @@ public partial class CalendarPage : ContentPage
             }
 
             var date = new DateTime(year, month, day);
-            var button = new Button
+            bool isSelected = selectedDate == date.Date;
+            bool isToday = date.Date == DateTime.Today;
+            var dayCell = new Border
+            {
+                BackgroundColor = GetDayColor(date),
+                StrokeThickness = isSelected ? 3 : isToday ? 2 : 1,
+                Stroke = isSelected
+                    ? ThemeColor("Accent", "Accent")
+                    : isToday
+                        ? ThemeColor("Accent", "Accent")
+                        : ThemeColor("BorderColorLight", "BorderColorDark"),
+                HeightRequest = 46,
+                Padding = 0
+            };
+            dayCell.StrokeShape = new RoundRectangle { CornerRadius = 18 };
+            dayCell.Content = new Label
             {
                 Text = day.ToString(),
                 FontAttributes = FontAttributes.Bold,
-                CornerRadius = 18,
-                HeightRequest = 46,
-                BackgroundColor = GetDayColor(date),
                 TextColor = GetDayTextColor(date),
-                BorderWidth = date.Date == DateTime.Today ? 2 : 0,
-                BorderColor = date.Date == DateTime.Today ? ThemeColor("Accent", "Accent") : Colors.Transparent
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalTextAlignment = TextAlignment.Center,
+                VerticalTextAlignment = TextAlignment.Center
             };
 
-            button.Clicked += (_, _) => ShowDayDetails(date);
-            CalendarGrid.Add(button, col++, row);
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (_, _) => ShowDayDetails(date);
+            dayCell.GestureRecognizers.Add(tapGesture);
+            CalendarGrid.Add(dayCell, col++, row);
         }
     }
 
@@ -103,7 +120,12 @@ public partial class CalendarPage : ContentPage
     {
         if (snapshot is null || !snapshot.Summaries.TryGetValue(date.Date, out var summary))
         {
-            return Color.FromArgb("#F3F6FC");
+            if (date.Date == DateTime.Today)
+            {
+                return ThemeColor("AccentSoftLight", "AccentSoftDark");
+            }
+
+            return ThemeColor("SurfaceAltLight", "SurfaceAltDark");
         }
 
         if (summary.HasIncompleteSession)
@@ -125,6 +147,11 @@ public partial class CalendarPage : ContentPage
     {
         if (snapshot is null || !snapshot.Summaries.TryGetValue(date.Date, out var summary))
         {
+            if (date.Date == DateTime.Today)
+            {
+                return ThemeColor("Accent", "HeroTextDark");
+            }
+
             return ThemeColor("TextSecondaryLight", "TextSecondaryDark");
         }
 
@@ -145,6 +172,9 @@ public partial class CalendarPage : ContentPage
 
     private void ShowDayDetails(DateTime date)
     {
+        selectedDate = date.Date;
+        BuildCalendar(currentDate.Year, currentDate.Month);
+
         if (snapshot is null || !snapshot.Summaries.TryGetValue(date.Date, out var summary))
         {
             SelectedDateLabel.Text = date.ToString("dddd, dd MMM yyyy");
