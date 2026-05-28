@@ -1,14 +1,13 @@
-﻿using TimeTracker;
+using TimeTracker.Helpers;
 
-namespace TimeTracker
+namespace TimeTracker;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            InitializeComponent();
-            MainPage = new AppShell();
-        }
-
+        InitializeComponent();
+        AppThemeManager.ApplySavedTheme(this);
+        MainPage = new AppShell();
     }
 }

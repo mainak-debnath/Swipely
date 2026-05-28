@@ -4,13 +4,18 @@
              x:Class="TimeTracker.App">
     <Application.Resources>
         <ResourceDictionary>
-            <!-- Light Theme -->
-            <Color x:Key="PageBackgroundColor">#FFFFFF</Color>
-            <Color x:Key="PrimaryTextColor">#1E1E1E</Color>
-            <Color x:Key="SecondaryTextColor">#888888</Color>
-            <Color x:Key="CardBackgroundColor">#F5F5F5</Color>
-            <Color x:Key="EntryBackgroundColor">#EEEEEE</Color>
-            <Color x:Key="ButtonColor">#007AFF</Color>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Compatibility aliases used across older pages -->
+            <Color x:Key="PageBackgroundColor">#F4F7FB</Color>
+            <Color x:Key="PrimaryTextColor">#132238</Color>
+            <Color x:Key="SecondaryTextColor">#60708A</Color>
+            <Color x:Key="CardBackgroundColor">#FCFDFF</Color>
+            <Color x:Key="EntryBackgroundColor">#EEF3FF</Color>
+            <Color x:Key="ButtonColor">#2D5BFF</Color>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

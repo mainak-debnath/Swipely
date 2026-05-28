@@ -15,7 +15,7 @@
 		<ApplicationTitle>Swipely</ApplicationTitle>
 		<ApplicationId>com.companyname.timetracker</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationVersion>2</ApplicationVersion>
 
 		<!-- Supported Platforms -->
 		<SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net8.0-ios'">11.0</SupportedOSPlatformVersion>

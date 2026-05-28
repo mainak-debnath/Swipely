@@ -4,16 +4,16 @@ namespace TimeTracker.Converters // Ensure this namespace matches your project
 {
     public class EnabledToTextColorConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is bool isEnabled && isEnabled)
             {
-                return Colors.White; // Enabled text color
+                return Colors.White;
             }
-            return Colors.Gray; // Disabled text color
+            return Color.FromArgb("#60708A");
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
