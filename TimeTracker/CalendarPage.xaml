@@ -3,34 +3,112 @@
              x:Class="TimeTracker.CalendarPage"
              Title="Calendar">
     <ScrollView>
-        <VerticalStackLayout Padding="10">
-            <Label Text="Swipe log calendar"
-                   FontSize="32"
-                   FontAttributes="Bold"
-                   TextColor="{DynamicResource PrimaryTextColor}"
-                   HorizontalOptions="Center"
-                   Margin="0,0,0,10" />
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20" Margin="0,10,0,10">
-                <Button Text="&lt;" Clicked="PreviousMonth_Clicked" />
-                <Label x:Name="MonthYearLabel"
-                       FontSize="18"
-                       FontAttributes="Bold"
-                       VerticalOptions="Center"/>
-                <Button Text="&gt;" Clicked="NextMonth_Clicked" />
-            </HorizontalStackLayout>
-            <Grid x:Name="CalendarGrid" RowSpacing="2" ColumnSpacing="2">
-            </Grid>
-            <Label x:Name="SelectedDateLabel" FontAttributes="Bold" Margin="10" />
-            <CollectionView x:Name="DaySessionsCollection" 
-                            VerticalOptions="Start">
+        <VerticalStackLayout Padding="24,18,24,28" Spacing="18">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Calendar overview"
+                       FontSize="28"
+                       FontAttributes="Bold" />
+                <Label Text="Review completed days, short days, and missed swipe-outs."
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+            </VerticalStackLayout>
+
+            <Border Padding="18" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="24" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="18">
+                    <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center">
+                        <Button Text="&lt;"
+                                WidthRequest="46"
+                                HeightRequest="46"
+                                Padding="0"
+                                Clicked="PreviousMonth_Clicked" />
+                        <Label x:Name="MonthYearLabel"
+                               Grid.Column="1"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               FontSize="20"
+                               FontAttributes="Bold" />
+                        <Button Grid.Column="2"
+                                Text="&gt;"
+                                WidthRequest="46"
+                                HeightRequest="46"
+                                Padding="0"
+                                Clicked="NextMonth_Clicked" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <Border Grid.Column="0" Padding="12" BackgroundColor="{AppThemeBinding Light={StaticResource SuccessSoftLight}, Dark={StaticResource SuccessSoftDark}}" StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
+                            <Label Text="Goal met"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Success}" />
+                        </Border>
+                        <Border Grid.Column="1" Padding="12" BackgroundColor="{AppThemeBinding Light={StaticResource DangerSoftLight}, Dark={StaticResource DangerSoftDark}}" StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
+                            <Label Text="Short day"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Danger}" />
+                        </Border>
+                        <Border Grid.Column="2" Padding="12" BackgroundColor="{AppThemeBinding Light={StaticResource WarningSoftLight}, Dark={StaticResource WarningSoftDark}}" StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
+                            <Label Text="Open session"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Warning}" />
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="CalendarGrid"
+                          ColumnSpacing="8"
+                          RowSpacing="8" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Padding="20" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="24" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="8">
+                    <Label x:Name="SelectedDateLabel"
+                           Text="Pick a day to inspect"
+                           FontSize="20"
+                           FontAttributes="Bold" />
+                    <Label x:Name="SelectedMetaLabel"
+                           Text="Session details will appear here."
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <CollectionView x:Name="DaySessionsCollection"
+                            SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Margin="5" BackgroundColor="#f0f0f0" CornerRadius="8" Padding="10">
-                            <VerticalStackLayout>
-                                <Label Text="{Binding TimeRange}" FontAttributes="Bold" />
-                                <Label Text="{Binding Duration}" TextColor="DarkGreen" FontSize="12" />
+                        <Border Margin="0,0,0,12"
+                                Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="{Binding TimeRange}"
+                                       FontSize="16"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding Duration}"
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                             </VerticalStackLayout>
-                        </Frame>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

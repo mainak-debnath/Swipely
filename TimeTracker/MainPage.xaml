@@ -1,145 +1,221 @@
-﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:xct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="TimeTracker.MainPage"
-             BackgroundColor="White">
+             Title="Home"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
+        <VerticalStackLayout Padding="24,18,24,28" Spacing="18">
 
-            <Grid Padding="10"
-                  BackgroundColor="#FBFBFB"
-                  ColumnDefinitions="Auto,*,Auto"
-                  VerticalOptions="Start"
-                  HeightRequest="56"
-                  Margin="0,0,0,10">
-                <Image Source="menu.png"
-                       HeightRequest="28"
-                       WidthRequest="28"
-                       VerticalOptions="Center"
-                       Margin="0,0,10,0" />
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                <Label x:Name="WelcomeLabel"
+                       Text="Today"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
 
-                <Label Grid.Column="1"
-                       Text="Swipely"
+                <Border Grid.Column="1"
+                        Padding="12,6"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <Label x:Name="TargetHoursLabel"
+                           Text="Goal 8h 00m"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Accent}" />
+                </Border>
+
+                <Label Grid.Row="1"
+                       Text="Your office time at a glance"
                        FontSize="28"
                        FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       TextColor="#333" />
-
-                <Image Grid.Column="2"
-                       Source="sync.png"
-                       HeightRequest="28"
-                       WidthRequest="28"
-                       VerticalOptions="Center"
-                       Margin="10,0,0,0" />
+                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
             </Grid>
 
-            <Frame CornerRadius="20" Padding="15" BackgroundColor="LightGreen" HorizontalOptions="Center">
-                <Label x:Name="StatusLabel" Text="🟢 Currently IN" FontSize="22" HorizontalOptions="Center" />
-            </Frame>
+            <Border Padding="22"
+                    StrokeThickness="0">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStop Color="{AppThemeBinding Light={StaticResource HeroStartLight}, Dark={StaticResource HeroStartDark}}" Offset="0.0" />
+                            <GradientStop Color="{AppThemeBinding Light={StaticResource HeroMidLight}, Dark={StaticResource HeroMidDark}}" Offset="0.5" />
+                            <GradientStop Color="{AppThemeBinding Light={StaticResource HeroEndLight}, Dark={StaticResource HeroEndDark}}" Offset="1.0" />
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="28" />
+                </Border.StrokeShape>
 
-            <VerticalStackLayout HorizontalOptions="Center" Spacing="15">
-                <!-- Time Display -->
-                <Label x:Name="ProgressTimeLabel" 
-                       Text="0h 00m / 8h 00m"
-                       FontSize="24" 
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center" 
-                       TextColor="#333" />
-
-                <!-- Linear Progress Bar Container -->
-                <Frame CornerRadius="15" 
-                       Padding="0" 
-                       BackgroundColor="#E0E0E0" 
-                       HeightRequest="30" 
-                       WidthRequest="300"
-                       HorizontalOptions="Center"
-                       HasShadow="False">
-                    <Grid>
-                        <!-- Progress Fill (Green part that grows) -->
-                        <Frame x:Name="ProgressFill" 
-                               CornerRadius="15" 
-                               BackgroundColor="#4CAF50" 
-                               HorizontalOptions="Start" 
-                               WidthRequest="0" 
-                               HeightRequest="30" 
-                               Padding="0"
-                               HasShadow="False" />
-
-                        <!-- Percentage Text Overlay -->
-                        <Label x:Name="PercentageLabel" 
-                               Text="0%" 
-                               FontSize="14" 
+                <VerticalStackLayout Spacing="18">
+                    <Border x:Name="StatusPill"
+                            Padding="12,6"
+                            HorizontalOptions="Start"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource HeroGlassLight}, Dark={StaticResource HeroGlassDark}}"
+                            StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="999" />
+                        </Border.StrokeShape>
+                        <Label x:Name="StatusLabel"
+                               Text="Currently out"
+                               FontSize="13"
                                FontAttributes="Bold"
-                               HorizontalOptions="Center" 
-                               VerticalOptions="Center"
-                               TextColor="White" />
-                    </Grid>
-                </Frame>
+                               TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+                    </Border>
 
-                <!-- Status Text -->
-                <Label x:Name="ProgressStatusLabel" 
-                       Text="Ready to start!"
-                       FontSize="16" 
-                       HorizontalOptions="Center"
-                       TextColor="Gray" />
-            </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label x:Name="ProgressTimeLabel"
+                               Text="0h 00m / 8h 00m"
+                               FontSize="34"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+                        <Label x:Name="ProgressStatusLabel"
+                               Text="Ready to start your day"
+                               FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
+                    </VerticalStackLayout>
 
-            <Label x:Name="TimeLeftLabel"
-                   Text="Time Left: 1h 45m"
-                   FontSize="18"
-                   TextColor="DarkRed"
-                   HorizontalOptions="Center" />
+                    <VerticalStackLayout Spacing="8">
+                        <Grid x:Name="ProgressTrack"
+                              HeightRequest="14"
+                              WidthRequest="320"
+                              HorizontalOptions="Start">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource HeroTrackLight}, Dark={StaticResource HeroTrackDark}}"
+                                    StrokeThickness="0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="999" />
+                                </Border.StrokeShape>
+                            </Border>
 
-            <Button x:Name="SwipeActionButton"
-                    Text="Swipe OUT"
-                    FontSize="18"
-                    TextColor="White"
-                    HeightRequest="50"
-                    CornerRadius="12"
-                    HorizontalOptions="Fill">
+                            <Border x:Name="ProgressFill"
+                                    WidthRequest="0"
+                                    BackgroundColor="#FFFFFF"
+                                    StrokeThickness="0"
+                                    HorizontalOptions="Start">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="999" />
+                                </Border.StrokeShape>
+                            </Border>
+                        </Grid>
 
-            </Button>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label x:Name="TimeLeftLabel"
+                                   Text="Time left: 8h 00m"
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
+                            <Label x:Name="PercentageLabel"
+                                   Grid.Column="1"
+                                   Text="0%"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+                        </Grid>
+                    </VerticalStackLayout>
 
-            <Frame BorderColor="Gray" CornerRadius="10" Padding="10">
-                <VerticalStackLayout>
-                    <Label x:Name="LastActionLabel" Text="Last Action: Swipe IN" FontSize="16" />
-                    <Label x:Name="LastActionTimeLabel" Text="Time: 10:45 AM" FontSize="16" />
-                    <Label x:Name="LastActionDateLabel" Text="Date: 05 Jul 2025" FontSize="16" />
+                    <Button x:Name="SwipeActionButton"
+                            Text="Swipe in"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceLight}}"
+                            TextColor="{StaticResource Accent}"
+                            FontSize="17"
+                            HeightRequest="54" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <Button x:Name="ToggleLogsButton"
-                    Text="▼ Show Today's Activity"
-                    BackgroundColor="#E85D04"
-                    TextColor="White"
-                    FontSize="16"
-                    CornerRadius="10"
-                    HeightRequest="45"
-                    Clicked="ToggleLogsButton_Clicked"
-                    HorizontalOptions="Fill">
-            </Button>
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Border Grid.Column="0" Padding="16" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="22" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Sessions today" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Label x:Name="SessionsCountLabel" Text="0" FontSize="24" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <StackLayout x:Name="LogsSection"
-                         IsVisible="False"
-                         Opacity="0"
-                         TranslationY="-10">
-                <Label Text="Today's Activity:" FontSize="18" FontAttributes="Bold" />
-                <CollectionView x:Name="TodayLogCollection">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Frame BorderColor="LightGray" CornerRadius="8" Padding="10" Margin="0,5">
-                                <VerticalStackLayout>
-                                    <Label Text="{Binding In}" />
-                                    <Label Text="{Binding Out}" />
-                                    <Label Text="{Binding Label}" FontSize="12" TextColor="Gray" />
-                                </VerticalStackLayout>
-                            </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </StackLayout>
+                <Border Grid.Column="1" Padding="16" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="22" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Current streak" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Label x:Name="StreakCountLabel" Text="0" FontSize="24" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
 
+                <Border Grid.Column="2" Padding="16" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="22" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Goal days" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Label x:Name="GoalDaysLabel" Text="0" FontSize="24" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Border Padding="20" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="24" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Last recorded swipe"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label x:Name="LastActionLabel"
+                           Text="No swipe recorded yet"
+                           FontSize="20"
+                           FontAttributes="Bold" />
+                    <Label x:Name="LastActionTimeLabel"
+                           Text=""
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label x:Name="LastActionDateLabel"
+                           Text=""
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Padding="18" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="24" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Today&apos;s activity"
+                                   FontSize="20"
+                                   FontAttributes="Bold" />
+                            <Label Text="Every swipe pair is grouped into one session."
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        </VerticalStackLayout>
+
+                        <Button x:Name="ToggleLogsButton"
+                                Grid.Column="1"
+                                Text="Show"
+                                WidthRequest="96"
+                                HeightRequest="40"
+                                Padding="12,8"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource AccentSoftLight}, Dark={StaticResource AccentSoftDark}}"
+                                TextColor="{StaticResource Accent}"
+                                Clicked="ToggleLogsButton_Clicked" />
+                    </Grid>
+
+                    <StackLayout x:Name="LogsSection"
+                                 IsVisible="False"
+                                 Opacity="0"
+                                 TranslationY="-8">
+                        <CollectionView x:Name="TodayLogCollection"
+                                        SelectionMode="None"
+                                        EmptyView="No sessions recorded for today yet." />
+                    </StackLayout>
+                </VerticalStackLayout>
+            </Border>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
