@@ -96,6 +96,7 @@ public partial class MainPage : ContentPage
 
             UpdateProgressText(snapshot);
             await UpdateProgressBarAsync(snapshot, animateProgress && !snapshot.IsCurrentlyInside);
+            await NotificationService.EvaluateAsync(snapshot);
             TodayLogCollection.ItemsSource = snapshot.TodaySessions.Select(session => new
             {
                 Range = $"{session.InTime:hh:mm tt} - {(session.OutTime.HasValue ? session.OutTime.Value.ToString("hh:mm tt") : "Active now")}",
@@ -103,10 +104,10 @@ public partial class MainPage : ContentPage
                     ? $"{FormatDuration(session.OutTime.Value - session.InTime)} in office"
                     : $"{FormatDuration(DateTime.Now - session.InTime)} and counting",
                 Tone = session.OutTime.HasValue
-                    ? ThemeColor("AccentSoftLight", "AccentSoftDark")
+                    ? ThemeColor("AccentSoftLight", "HeroMidDark")
                     : ThemeColor("SuccessSoftLight", "SuccessSoftDark"),
                 ToneText = session.OutTime.HasValue
-                    ? ThemeColor("Accent", "Accent")
+                    ? ThemeColor("Accent", "White")
                     : ThemeColor("Success", "Success")
             }).ToList();
 

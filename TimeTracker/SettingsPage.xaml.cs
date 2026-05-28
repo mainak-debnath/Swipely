@@ -11,6 +11,7 @@ public partial class SettingsPage : ContentPage
     private string storagePath => TimeTrackingService.StoragePath;
     private DateTime? selectedMonth;
     private bool suppressThemeSelection;
+    private bool suppressNotificationSelection;
     private bool isSaveAnimating;
 
     public SettingsPage()
@@ -33,6 +34,13 @@ public partial class SettingsPage : ContentPage
         suppressThemeSelection = true;
         ThemePicker.SelectedItem = AppThemeManager.GetSavedTheme();
         suppressThemeSelection = false;
+
+        suppressNotificationSelection = true;
+        GoalNotificationSwitch.IsToggled = NotificationPreferences.GoalNotificationsEnabled;
+        LongSessionNotificationSwitch.IsToggled = NotificationPreferences.LongSessionNotificationsEnabled;
+        LongSessionHoursEntry.Text = NotificationPreferences.LongSessionReminderHours.ToString("0.##");
+        UpdateLongSessionReminderSettings(LongSessionNotificationSwitch.IsToggled);
+        suppressNotificationSelection = false;
     }
 
     private async void OnSaveClicked(object sender, EventArgs e)
@@ -64,6 +72,55 @@ public partial class SettingsPage : ContentPage
 
         AppThemeManager.SaveAndApplyTheme(Application.Current, themeName);
         await Snackbar.Make($"Theme set to {themeName}", duration: TimeSpan.FromSeconds(2)).Show();
+    }
+
+    private async void GoalNotificationSwitch_Toggled(object sender, ToggledEventArgs e)
+    {
+        if (suppressNotificationSelection)
+        {
+            return;
+        }
+
+        NotificationPreferences.GoalNotificationsEnabled = e.Value;
+        await Snackbar.Make(e.Value ? "Goal notifications enabled" : "Goal notifications disabled", duration: TimeSpan.FromSeconds(2)).Show();
+    }
+
+    private async void LongSessionNotificationSwitch_Toggled(object sender, ToggledEventArgs e)
+    {
+        if (suppressNotificationSelection)
+        {
+            return;
+        }
+
+        NotificationPreferences.LongSessionNotificationsEnabled = e.Value;
+        UpdateLongSessionReminderSettings(e.Value);
+        await Snackbar.Make(e.Value ? "Long-session reminders enabled" : "Long-session reminders disabled", duration: TimeSpan.FromSeconds(2)).Show();
+    }
+
+    private async void LongSessionHoursEntry_Unfocused(object sender, FocusEventArgs e)
+    {
+        if (!LongSessionNotificationSwitch.IsToggled)
+        {
+            LongSessionHoursEntry.Text = NotificationPreferences.LongSessionReminderHours.ToString("0.##");
+            return;
+        }
+
+        if (double.TryParse(LongSessionHoursEntry.Text, out double hours) && hours >= 1)
+        {
+            NotificationPreferences.LongSessionReminderHours = hours;
+            LongSessionHoursEntry.Text = NotificationPreferences.LongSessionReminderHours.ToString("0.##");
+            return;
+        }
+
+        LongSessionHoursEntry.Text = NotificationPreferences.LongSessionReminderHours.ToString("0.##");
+        await Snackbar.Make("Enter at least 1 hour for the reminder", duration: TimeSpan.FromSeconds(2)).Show();
+    }
+
+    private void UpdateLongSessionReminderSettings(bool isEnabled)
+    {
+        LongSessionReminderSettings.IsEnabled = isEnabled;
+        LongSessionHoursEntry.IsEnabled = isEnabled;
+        LongSessionReminderSettings.Opacity = isEnabled ? 1 : 0.48;
     }
 
     private void OnDangerZoneToggled(object sender, EventArgs e)

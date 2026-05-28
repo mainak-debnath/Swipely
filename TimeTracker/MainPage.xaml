@@ -195,15 +195,26 @@
                                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         </VerticalStackLayout>
 
-                        <Button x:Name="ToggleLogsButton"
-                                Grid.Column="1"
-                                Text="Show"
+                        <Border Grid.Column="1"
                                 WidthRequest="96"
                                 HeightRequest="40"
-                                Padding="12,8"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource AccentSoftLight}, Dark={StaticResource AccentSoftDark}}"
-                                TextColor="{StaticResource Accent}"
-                                Clicked="ToggleLogsButton_Clicked" />
+                                StrokeThickness="0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="{AppThemeBinding Light={StaticResource AccentSoftLight}, Dark={StaticResource HeroMidDark}}" Offset="0.0" />
+                                    <GradientStop Color="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource HeroEndDark}}" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20" />
+                            </Border.StrokeShape>
+                            <Button x:Name="ToggleLogsButton"
+                                    Text="Show"
+                                    Padding="12,8"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource Accent}, Dark={StaticResource White}}"
+                                    Clicked="ToggleLogsButton_Clicked" />
+                        </Border>
                     </Grid>
 
                     <StackLayout x:Name="LogsSection"
