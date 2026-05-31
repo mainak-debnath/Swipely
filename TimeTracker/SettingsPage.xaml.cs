@@ -10,14 +10,12 @@ public partial class SettingsPage : ContentPage
 {
     private string storagePath => TimeTrackingService.StoragePath;
     private DateTime? selectedMonth;
-    private bool suppressThemeSelection;
     private bool suppressNotificationSelection;
     private bool isSaveAnimating;
 
     public SettingsPage()
     {
         InitializeComponent();
-        ThemePicker.ItemsSource = AppThemeManager.ThemeOptions.ToList();
         LoadCurrentValues();
     }
 
@@ -30,10 +28,9 @@ public partial class SettingsPage : ContentPage
     private void LoadCurrentValues()
     {
         HoursEntry.Text = TimeTrackingService.GetOfficeHoursGoal().ToString("0.##");
+        OfficeDaysEntry.Text = TimeTrackingService.GetOfficeDaysPerWeekGoal().ToString();
 
-        suppressThemeSelection = true;
-        ThemePicker.SelectedItem = AppThemeManager.GetSavedTheme();
-        suppressThemeSelection = false;
+        UpdateThemeSelector(AppThemeManager.GetSavedTheme());
 
         suppressNotificationSelection = true;
         GoalNotificationSwitch.IsToggled = NotificationPreferences.GoalNotificationsEnabled;
@@ -47,31 +44,106 @@ public partial class SettingsPage : ContentPage
     {
         SaveGoalButton.IsEnabled = false;
 
-        if (double.TryParse(HoursEntry.Text, out double hours) && hours > 0)
+        bool hasValidHours = double.TryParse(HoursEntry.Text, out double hours) && hours > 0;
+        bool hasValidOfficeDays = int.TryParse(OfficeDaysEntry.Text, out int officeDays) && officeDays is >= 1 and <= 5;
+
+        if (hasValidHours && hasValidOfficeDays)
         {
             TimeTrackingService.SetOfficeHoursGoal(hours);
+            TimeTrackingService.SetOfficeDaysPerWeekGoal(officeDays);
             await PlaySaveSuccessAnimationAsync();
-            await Snackbar.Make("Daily goal updated successfully", duration: TimeSpan.FromSeconds(2)).Show();
+            await Snackbar.Make("Goals updated successfully", duration: TimeSpan.FromSeconds(2)).Show();
             WeakReferenceMessenger.Default.Send(new OfficeHoursUpdatedMessage(hours));
         }
         else
         {
             await PlaySaveErrorAnimationAsync();
-            await Snackbar.Make("Please enter a valid number of hours", duration: TimeSpan.FromSeconds(2)).Show();
+            await Snackbar.Make("Enter valid hours and 1-5 office days", duration: TimeSpan.FromSeconds(2)).Show();
         }
 
         SaveGoalButton.IsEnabled = true;
     }
 
-    private async void ThemePicker_SelectedIndexChanged(object sender, EventArgs e)
+    private async void ThemeSelector_Tapped(object sender, TappedEventArgs e)
     {
-        if (suppressThemeSelection || ThemePicker.SelectedItem is not string themeName || Application.Current is null)
+        UpdateThemeSelector(AppThemeManager.GetSavedTheme());
+
+        ThemeSelectionOverlay.IsVisible = true;
+        ThemeSelectionOverlay.Opacity = 0;
+        ThemeSelectionCard.Scale = 0.94;
+        ThemeSelectionCard.TranslationY = 18;
+
+        await Task.WhenAll(
+            ThemeSelectionOverlay.FadeTo(1, 180, Easing.CubicOut),
+            ThemeSelectionCard.ScaleTo(1, 260, Easing.CubicOut),
+            ThemeSelectionCard.TranslateTo(0, 0, 260, Easing.CubicOut));
+    }
+
+    private async void ThemeAuto_Tapped(object sender, TappedEventArgs e) => await SelectThemeAsync("Auto");
+
+    private async void ThemeLight_Tapped(object sender, TappedEventArgs e) => await SelectThemeAsync("Light");
+
+    private async void ThemeDark_Tapped(object sender, TappedEventArgs e) => await SelectThemeAsync("Dark");
+
+    private async void ThemeSelectionClose_Clicked(object sender, EventArgs e) => await CloseThemeSelectionAsync();
+
+    private async void ThemeSelectionBackdrop_Tapped(object sender, TappedEventArgs e) => await CloseThemeSelectionAsync();
+
+    private void ThemeSelectionCard_Tapped(object sender, TappedEventArgs e)
+    {
+        // This prevents a tap inside the card from behaving like a backdrop dismiss.
+    }
+
+    private async Task SelectThemeAsync(string themeName)
+    {
+        if (Application.Current is null)
         {
             return;
         }
 
         AppThemeManager.SaveAndApplyTheme(Application.Current, themeName);
+        UpdateThemeSelector(themeName);
+        await CloseThemeSelectionAsync();
         await Snackbar.Make($"Theme set to {themeName}", duration: TimeSpan.FromSeconds(2)).Show();
+    }
+
+    private async Task CloseThemeSelectionAsync()
+    {
+        if (!ThemeSelectionOverlay.IsVisible)
+        {
+            return;
+        }
+
+        await Task.WhenAll(
+            ThemeSelectionOverlay.FadeTo(0, 150, Easing.CubicIn),
+            ThemeSelectionCard.ScaleTo(0.96, 150, Easing.CubicIn),
+            ThemeSelectionCard.TranslateTo(0, 12, 150, Easing.CubicIn));
+
+        ThemeSelectionOverlay.IsVisible = false;
+        ThemeSelectionCard.Scale = 1;
+        ThemeSelectionCard.TranslationY = 0;
+    }
+
+    private void UpdateThemeSelector(string themeName)
+    {
+        ThemeSelectorLabel.Text = themeName;
+        ThemeSelectorIcon.Text = themeName[..1];
+
+        UpdateThemeOption(ThemeAutoOption, ThemeAutoCheck, themeName == "Auto");
+        UpdateThemeOption(ThemeLightOption, ThemeLightCheck, themeName == "Light");
+        UpdateThemeOption(ThemeDarkOption, ThemeDarkCheck, themeName == "Dark");
+    }
+
+    private static void UpdateThemeOption(Border option, Label checkLabel, bool isSelected)
+    {
+        option.BackgroundColor = isSelected
+            ? ThemeColor("AccentSoftLight", "AccentSoftDark")
+            : ThemeColor("SurfaceAltLight", "SurfaceAltDark");
+        option.Stroke = isSelected
+            ? ThemeColor("Accent", "Accent")
+            : ThemeColor("BorderColorLight", "BorderColorDark");
+        option.StrokeThickness = isSelected ? 2 : 1;
+        checkLabel.Text = isSelected ? "Selected" : string.Empty;
     }
 
     private async void GoalNotificationSwitch_Toggled(object sender, ToggledEventArgs e)

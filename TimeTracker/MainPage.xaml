@@ -5,6 +5,7 @@
              Title="Home"
              BackgroundColor="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}">
 
+    <Grid>
     <ScrollView>
         <VerticalStackLayout Padding="24,18,24,28" Spacing="18">
 
@@ -130,8 +131,9 @@
                         <RoundRectangle CornerRadius="22" />
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="Sessions today" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                        <Label x:Name="SessionsCountLabel" Text="0" FontSize="24" FontAttributes="Bold" />
+                        <Label Text="Office this week" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Label x:Name="OfficeDaysWeekLabel" Text="0 / 3" FontSize="24" FontAttributes="Bold" />
+                        <Label x:Name="OfficeDaysLeftWeekLabel" Text="Weekly target met" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -140,8 +142,30 @@
                         <RoundRectangle CornerRadius="22" />
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="Current streak" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                        <Label x:Name="StreakCountLabel" Text="0" FontSize="24" FontAttributes="Bold" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Weekly streak" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            <Border Grid.Column="1"
+                                    WidthRequest="20"
+                                    HeightRequest="20"
+                                    Padding="0"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource AccentSoftLight}, Dark={StaticResource AccentSoftDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10" />
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="WeeklyStreakInfo_Tapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="i"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Accent}"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+                        <Label x:Name="WeeklyStreakLabel" Text="0 weeks" FontSize="24" FontAttributes="Bold" />
+                        <Label x:Name="BestWeeklyStreakLabel" Text="Best: 0 weeks" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -150,7 +174,7 @@
                         <RoundRectangle CornerRadius="22" />
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="Goal days" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Label Text="Goal days this month" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <Label x:Name="GoalDaysLabel" Text="0" FontSize="24" FontAttributes="Bold" />
                     </VerticalStackLayout>
                 </Border>
@@ -229,4 +253,129 @@
             </Border>
         </VerticalStackLayout>
     </ScrollView>
+
+        <Grid x:Name="WeeklyStreakInfoOverlay"
+              IsVisible="False"
+              Opacity="0"
+              Padding="22"
+              BackgroundColor="{AppThemeBinding Light={StaticResource OverlayLight}, Dark={StaticResource OverlayDark}}">
+            <Border x:Name="WeeklyStreakInfoCard"
+                    Padding="0"
+                    MaximumWidthRequest="420"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="30" />
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="#40000000" Offset="0,18" Radius="34" Opacity="0.35" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+                    <Grid Padding="22"
+                          ColumnDefinitions="*,Auto">
+                        <Grid.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{AppThemeBinding Light={StaticResource HeroStartLight}, Dark={StaticResource HeroStartDark}}" Offset="0.0" />
+                                <GradientStop Color="{AppThemeBinding Light={StaticResource HeroMidLight}, Dark={StaticResource HeroMidDark}}" Offset="0.6" />
+                                <GradientStop Color="{AppThemeBinding Light={StaticResource HeroEndLight}, Dark={StaticResource HeroEndDark}}" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Grid.Background>
+
+                        <VerticalStackLayout Spacing="8">
+                            <Border Padding="10,5"
+                                    HorizontalOptions="Start"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource HeroGlassLight}, Dark={StaticResource HeroGlassDark}}"
+                                    StrokeThickness="0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="999" />
+                                </Border.StrokeShape>
+                                <Label Text="Weekly rhythm"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+                            </Border>
+
+                            <Label Text="How your streak works"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+
+                            <Label x:Name="WeeklyStreakInfoSummaryLabel"
+                                   Text="Complete your weekly office-day target to keep the streak alive."
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
+                        </VerticalStackLayout>
+
+                        <Border Grid.Column="1"
+                                WidthRequest="36"
+                                HeightRequest="36"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource HeroGlassLight}, Dark={StaticResource HeroGlassDark}}"
+                                StrokeThickness="0"
+                                VerticalOptions="Start">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
+                            <Button Text="X"
+                                    Padding="0"
+                                    FontAttributes="Bold"
+                                    FontSize="13"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}"
+                                    Clicked="WeeklyStreakInfoClose_Clicked" />
+                        </Border>
+                    </Grid>
+
+                    <VerticalStackLayout Padding="22" Spacing="14">
+                        <Border Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="What counts"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Label x:Name="WeeklyStreakInfoTargetLabel"
+                                       Text="A week counts when your office days reach the target set in Settings."
+                                       FontSize="13"
+                                       LineBreakMode="WordWrap"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SuccessSoftLight}, Dark={StaticResource SuccessSoftDark}}"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="No harsh reset"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Label Text="The current week only joins the streak after the target is met. An unfinished current week does not break it."
+                                       FontSize="13"
+                                       LineBreakMode="WordWrap"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Button Text="Got it"
+                                HeightRequest="48"
+                                CornerRadius="18"
+                                FontAttributes="Bold"
+                                BackgroundColor="{StaticResource Accent}"
+                                TextColor="White"
+                                Clicked="WeeklyStreakInfoClose_Clicked" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
 </ContentPage>

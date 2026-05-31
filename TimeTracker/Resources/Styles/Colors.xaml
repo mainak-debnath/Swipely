@@ -30,6 +30,7 @@
     <Color x:Key="AccentSoftLight">#DCE5FF</Color>
     <Color x:Key="AccentSoftDark">#183366</Color>
     <Color x:Key="Success">#0F9F6E</Color>
+    <Color x:Key="SuccessBrightDark">#34D399</Color>
     <Color x:Key="SuccessSoftLight">#DCF7EC</Color>
     <Color x:Key="SuccessSoftDark">#12372F</Color>
     <Color x:Key="Danger">#D34C6A</Color>
