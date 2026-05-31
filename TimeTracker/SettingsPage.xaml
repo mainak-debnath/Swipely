@@ -1,6 +1,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:TimeTracker.Converters"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="TimeTracker.SettingsPage"
              Title="Settings"
              BackgroundColor="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}">
@@ -58,7 +59,7 @@
                                    FontSize="24"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
-                            <Label Text="Swipely uses this goal for the dashboard, calendar states, and future reminders."
+                            <Label Text="Swipely uses these goals for the dashboard, calendar states, and future reminders."
                                    FontSize="14"
                                    TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
                         </VerticalStackLayout>
@@ -106,8 +107,51 @@
                                    TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
                         </Grid>
 
+                        <Grid ColumnDefinitions="Auto,Auto,*"
+                              ColumnSpacing="12"
+                              VerticalOptions="Center">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource HeroGlassLight}, Dark={StaticResource HeroGlassDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource HeroTrackLight}, Dark={StaticResource HeroTrackDark}}"
+                                    StrokeThickness="1"
+                                    Padding="14,10">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="18" />
+                                </Border.StrokeShape>
+                                <Label Text="Presence"
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
+                            </Border>
+
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceLight}}"
+                                    StrokeThickness="0"
+                                    Padding="0"
+                                    WidthRequest="110"
+                                    HeightRequest="56">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="18" />
+                                </Border.StrokeShape>
+                                <Entry x:Name="OfficeDaysEntry"
+                                       Keyboard="Numeric"
+                                       Placeholder="3"
+                                       BackgroundColor="Transparent"
+                                       TextColor="{StaticResource Accent}"
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource HeroFieldPlaceholderLight}, Dark={StaticResource HeroFieldPlaceholderDark}}"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       FontSize="22"
+                                       FontAttributes="Bold" />
+                            </Border>
+
+                            <Label Grid.Column="2"
+                                   Text="days per week"
+                                   FontSize="14"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
+                        </Grid>
+
                         <Button x:Name="SaveGoalButton"
-                                Text="Save Goal"
+                                Text="Save Goals"
                                 Clicked="OnSaveClicked"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceLight}}"
                                 TextColor="{StaticResource Accent}"
@@ -146,17 +190,57 @@
                                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                             </VerticalStackLayout>
 
-                            <Border Grid.Column="1"
-                                    Padding="12,0"
+                            <Border x:Name="ThemeSelectorButton"
+                                    Grid.Column="1"
+                                    Padding="14,10"
+                                    MinimumWidthRequest="148"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
                                     Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
                                 <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="18" />
+                                    <RoundRectangle CornerRadius="20" />
                                 </Border.StrokeShape>
-                                <Picker x:Name="ThemePicker"
-                                        Title="Theme"
-                                        WidthRequest="130"
-                                        SelectedIndexChanged="ThemePicker_SelectedIndexChanged" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="ThemeSelector_Tapped" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="10"
+                                      VerticalOptions="Center">
+                                    <Border WidthRequest="34"
+                                            HeightRequest="34"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource AccentSoftLight}, Dark={StaticResource AccentSoftDark}}"
+                                            StrokeThickness="0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="17" />
+                                        </Border.StrokeShape>
+                                        <Label x:Name="ThemeSelectorIcon"
+                                               Text="A"
+                                               FontSize="14"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Accent}"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="1"
+                                                         VerticalOptions="Center">
+                                        <Label Text="Mode"
+                                               FontSize="11"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        <Label x:Name="ThemeSelectorLabel"
+                                               Text="Auto"
+                                               FontSize="15"
+                                               FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2"
+                                           Text="v"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource Accent}"
+                                           VerticalTextAlignment="Center" />
+                                </Grid>
                             </Border>
                         </Grid>
                     </VerticalStackLayout>
@@ -341,6 +425,165 @@
                 </Border>
             </VerticalStackLayout>
         </ScrollView>
+
+        <Grid x:Name="ThemeSelectionOverlay"
+              IsVisible="False"
+              Opacity="0"
+              Padding="22"
+              BackgroundColor="{AppThemeBinding Light={StaticResource OverlayLight}, Dark={StaticResource OverlayDark}}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="ThemeSelectionBackdrop_Tapped" />
+            </Grid.GestureRecognizers>
+            <Border x:Name="ThemeSelectionCard"
+                    Padding="0"
+                    MaximumWidthRequest="430"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="ThemeSelectionCard_Tapped" />
+                </Border.GestureRecognizers>
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="30" />
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="#40000000" Offset="0,18" Radius="34" Opacity="0.35" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+                    <Grid Padding="22"
+                          ColumnDefinitions="*,Auto">
+                        <Grid.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{AppThemeBinding Light={StaticResource HeroStartLight}, Dark={StaticResource HeroStartDark}}" Offset="0.0" />
+                                <GradientStop Color="{AppThemeBinding Light={StaticResource HeroMidLight}, Dark={StaticResource HeroMidDark}}" Offset="0.6" />
+                                <GradientStop Color="{AppThemeBinding Light={StaticResource HeroEndLight}, Dark={StaticResource HeroEndDark}}" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Grid.Background>
+
+                        <VerticalStackLayout Spacing="8">
+                            <Border Padding="10,5"
+                                    HorizontalOptions="Start"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource HeroGlassLight}, Dark={StaticResource HeroGlassDark}}"
+                                    StrokeThickness="0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="999" />
+                                </Border.StrokeShape>
+                                <Label Text="Appearance"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+                            </Border>
+
+                            <Label Text="Choose your theme"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+
+                            <Label Text="Lock Swipely to a palette or let it follow your phone."
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
+                        </VerticalStackLayout>
+
+                        <Border Grid.Column="1"
+                                WidthRequest="36"
+                                HeightRequest="36"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource HeroGlassLight}, Dark={StaticResource HeroGlassDark}}"
+                                StrokeThickness="0"
+                                VerticalOptions="Start">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
+                            <Button Text="X"
+                                    Padding="0"
+                                    FontAttributes="Bold"
+                                    FontSize="13"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}"
+                                    Clicked="ThemeSelectionClose_Clicked" />
+                        </Border>
+                    </Grid>
+
+                    <VerticalStackLayout Padding="22" Spacing="12">
+                        <Border x:Name="ThemeAutoOption"
+                                Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="22" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="ThemeAuto_Tapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{AppThemeBinding Light={StaticResource AccentSoftLight}, Dark={StaticResource AccentSoftDark}}" StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="21" />
+                                    </Border.StrokeShape>
+                                    <Label Text="A" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Accent}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="Auto" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Text="Follow the phone theme." FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                </VerticalStackLayout>
+                                <Label x:Name="ThemeAutoCheck" Grid.Column="2" Text="" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Accent}" VerticalTextAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <Border x:Name="ThemeLightOption"
+                                Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="22" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="ThemeLight_Tapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{StaticResource WarningSoftLight}" StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="21" />
+                                    </Border.StrokeShape>
+                                    <Label Text="L" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Warning}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="Light" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Text="Bright, soft, and easy for daytime use." FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                </VerticalStackLayout>
+                                <Label x:Name="ThemeLightCheck" Grid.Column="2" Text="" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Accent}" VerticalTextAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <Border x:Name="ThemeDarkOption"
+                                Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="22" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="ThemeDark_Tapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{StaticResource SurfaceAltDark}" Stroke="{StaticResource BorderColorDark}">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="21" />
+                                    </Border.StrokeShape>
+                                    <Label Text="D" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextPrimaryDark}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="Dark" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Text="A dedicated Swipely dark palette." FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                </VerticalStackLayout>
+                                <Label x:Name="ThemeDarkCheck" Grid.Column="2" Text="" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Accent}" VerticalTextAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
 
         <Grid x:Name="MonthSelectionOverlay"
               IsVisible="False"

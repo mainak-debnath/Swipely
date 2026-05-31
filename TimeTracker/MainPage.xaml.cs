@@ -57,10 +57,10 @@ public partial class MainPage : ContentPage
 
             StatusLabel.Text = snapshot.IsCurrentlyInside ? "Currently inside" : "Currently out";
             StatusPill.BackgroundColor = snapshot.IsCurrentlyInside
-                ? ThemeColor("HeroGlassLight", "HeroGlassDark")
+                ? ThemeColor("SuccessSoftLight", "SuccessSoftDark")
                 : ThemeColor("DangerSoftLight", "DangerSoftDark");
             StatusLabel.TextColor = snapshot.IsCurrentlyInside
-                ? ThemeColor("HeroTextLight", "HeroTextDark")
+                ? ThemeColor("Success", "Success")
                 : ThemeColor("Danger", "Danger");
 
             ProgressTimeLabel.Text = $"{FormatDuration(snapshot.TodayTotal)} / {FormatDuration(snapshot.RequiredTime)}";
@@ -68,8 +68,9 @@ public partial class MainPage : ContentPage
             TimeLeftLabel.Text = snapshot.TodayTotal >= snapshot.RequiredTime
                 ? "Daily goal reached"
                 : snapshot.IsCurrentlyInside
-                    ? $"Time left: {FormatDuration(snapshot.TimeLeft)}"
-                    : $"Still needed today: {FormatDuration(snapshot.TimeLeft)}";
+                    ? $"Time left: {FormatDurationRoundedUp(snapshot.TimeLeft)}"
+                    : $"Still needed today: {FormatDurationRoundedUp(snapshot.TimeLeft)}";
+            TimeLeftLabel.TextColor = ThemeColor("HeroSubtleLight", "HeroSubtleDark");
 
             SwipeActionButton.Text = snapshot.IsCurrentlyInside ? "Swipe out" : "Swipe in";
             SwipeActionButton.BackgroundColor = ThemeColor("White", "SurfaceLight");
@@ -77,8 +78,12 @@ public partial class MainPage : ContentPage
                 ? ThemeColor("Danger", "Danger")
                 : ThemeColor("Accent", "Accent");
 
-            SessionsCountLabel.Text = snapshot.TodaySessions.Count.ToString();
-            StreakCountLabel.Text = snapshot.CurrentStreak.ToString();
+            OfficeDaysWeekLabel.Text = $"{snapshot.ActiveDaysThisWeek} / {snapshot.RequiredOfficeDaysPerWeek}";
+            OfficeDaysLeftWeekLabel.Text = snapshot.OfficeDaysLeftThisWeek == 0
+                ? "Weekly target met"
+                : $"{snapshot.OfficeDaysLeftThisWeek} days left";
+            WeeklyStreakLabel.Text = FormatWeeks(snapshot.WeeklyStreak);
+            BestWeeklyStreakLabel.Text = $"Best: {FormatWeeks(snapshot.BestWeeklyStreak)}";
             GoalDaysLabel.Text = snapshot.GoalDaysThisMonth.ToString();
 
             if (snapshot.LastSwipeTime.HasValue)
@@ -181,7 +186,7 @@ public partial class MainPage : ContentPage
         }
         else if (snapshot.TodayTotal > TimeSpan.Zero)
         {
-            ProgressStatusLabel.Text = $"{FormatDuration(snapshot.TimeLeft)} left to hit today&apos;s target.";
+            ProgressStatusLabel.Text = $"{FormatDurationRoundedUp(snapshot.TimeLeft)} left to hit today's target.";
             ProgressStatusLabel.TextColor = ThemeColor("HeroSubtleLight", "HeroSubtleDark");
         }
         else
@@ -196,7 +201,7 @@ public partial class MainPage : ContentPage
         var progress = Math.Clamp(snapshot.TodayTotal.TotalSeconds / snapshot.RequiredTime.TotalSeconds, 0, 1);
         var targetWidth = (ProgressTrack.Width <= 0 ? ProgressTrack.WidthRequest : ProgressTrack.Width) * progress;
         ProgressFill.BackgroundColor = snapshot.TodayTotal >= snapshot.RequiredTime
-            ? ThemeColor("WarningSoftLight", "WarningSoftDark")
+            ? ThemeColor("SuccessSoftLight", "SuccessBrightDark")
             : ThemeColor("White", "SurfaceLight");
 
         if (animate)
@@ -266,7 +271,54 @@ public partial class MainPage : ContentPage
         }
     }
 
+    private async void WeeklyStreakInfo_Tapped(object sender, TappedEventArgs e)
+    {
+        var weeklyGoal = TimeTrackingService.GetOfficeDaysPerWeekGoal();
+        WeeklyStreakInfoSummaryLabel.Text = $"Complete {weeklyGoal} office days in a week to keep your streak alive.";
+        WeeklyStreakInfoTargetLabel.Text = $"A week counts when you complete your {weeklyGoal}-day office target. You can change this target from Settings anytime.";
+
+        WeeklyStreakInfoOverlay.IsVisible = true;
+        WeeklyStreakInfoOverlay.Opacity = 0;
+        WeeklyStreakInfoCard.Scale = 0.94;
+        WeeklyStreakInfoCard.TranslationY = 18;
+
+        await Task.WhenAll(
+            WeeklyStreakInfoOverlay.FadeTo(1, 180, Easing.CubicOut),
+            WeeklyStreakInfoCard.ScaleTo(1, 260, Easing.CubicOut),
+            WeeklyStreakInfoCard.TranslateTo(0, 0, 260, Easing.CubicOut));
+    }
+
+    private async void WeeklyStreakInfoClose_Clicked(object sender, EventArgs e)
+    {
+        if (!WeeklyStreakInfoOverlay.IsVisible)
+        {
+            return;
+        }
+
+        await Task.WhenAll(
+            WeeklyStreakInfoOverlay.FadeTo(0, 150, Easing.CubicIn),
+            WeeklyStreakInfoCard.ScaleTo(0.96, 150, Easing.CubicIn),
+            WeeklyStreakInfoCard.TranslateTo(0, 12, 150, Easing.CubicIn));
+
+        WeeklyStreakInfoOverlay.IsVisible = false;
+        WeeklyStreakInfoCard.Scale = 1;
+        WeeklyStreakInfoCard.TranslationY = 0;
+    }
+
     private static string FormatDuration(TimeSpan timeSpan) => $"{(int)timeSpan.TotalHours}h {timeSpan.Minutes:D2}m";
+
+    private static string FormatDurationRoundedUp(TimeSpan timeSpan)
+    {
+        if (timeSpan <= TimeSpan.Zero)
+        {
+            return "0h 00m";
+        }
+
+        var rounded = TimeSpan.FromMinutes(Math.Ceiling(timeSpan.TotalMinutes));
+        return FormatDuration(rounded);
+    }
+
+    private static string FormatWeeks(int weeks) => weeks == 1 ? "1 week" : $"{weeks} weeks";
 
     private static Color ThemeColor(string lightKey, string darkKey)
     {

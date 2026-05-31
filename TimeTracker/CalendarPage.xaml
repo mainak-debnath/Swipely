@@ -46,7 +46,11 @@
                             <Label Text="Goal met"
                                    FontSize="12"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource Success}" />
+                                   TextColor="{StaticResource Success}"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
                         </Border>
                         <Border Grid.Column="1" Padding="12" BackgroundColor="{AppThemeBinding Light={StaticResource DangerSoftLight}, Dark={StaticResource DangerSoftDark}}" StrokeThickness="0">
                             <Border.StrokeShape>
@@ -55,6 +59,10 @@
                             <Label Text="Short day"
                                    FontSize="12"
                                    FontAttributes="Bold"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center"
                                    TextColor="{StaticResource Danger}" />
                         </Border>
                         <Border Grid.Column="2" Padding="12" BackgroundColor="{AppThemeBinding Light={StaticResource WarningSoftLight}, Dark={StaticResource WarningSoftDark}}" StrokeThickness="0">
@@ -64,6 +72,10 @@
                             <Label Text="Open session"
                                    FontSize="12"
                                    FontAttributes="Bold"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center"
                                    TextColor="{StaticResource Warning}" />
                         </Border>
                     </Grid>
