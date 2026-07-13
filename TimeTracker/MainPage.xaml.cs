@@ -53,7 +53,7 @@ public partial class MainPage : ContentPage
         {
             var snapshot = TimeTrackingService.BuildSnapshot(swipeTimes, DateTime.Now);
             WelcomeLabel.Text = DateTime.Now.ToString("dddd, dd MMMM");
-            TargetHoursLabel.Text = $"Goal {FormatDuration(snapshot.RequiredTime)}";
+            TargetHoursLabel.Text = $"Goal {FormatHeroDuration(snapshot.RequiredTime, snapshot.RequiredTime)}";
 
             StatusLabel.Text = snapshot.IsCurrentlyInside ? "Currently inside" : "Currently out";
             StatusPill.BackgroundColor = snapshot.IsCurrentlyInside
@@ -63,14 +63,8 @@ public partial class MainPage : ContentPage
                 ? ThemeColor("Success", "Success")
                 : ThemeColor("Danger", "Danger");
 
-            ProgressTimeLabel.Text = $"{FormatDuration(snapshot.TodayTotal)} / {FormatDuration(snapshot.RequiredTime)}";
+            ProgressTimeLabel.Text = $"{FormatHeroDuration(snapshot.TodayTotal, snapshot.RequiredTime)} / {FormatHeroDuration(snapshot.RequiredTime, snapshot.RequiredTime)}";
             PercentageLabel.Text = $"{Math.Min(100, (int)Math.Round((snapshot.TodayTotal.TotalSeconds / snapshot.RequiredTime.TotalSeconds) * 100))}%";
-            TimeLeftLabel.Text = snapshot.TodayTotal >= snapshot.RequiredTime
-                ? "Daily goal reached"
-                : snapshot.IsCurrentlyInside
-                    ? $"Time left: {FormatDurationRoundedUp(snapshot.TimeLeft)}"
-                    : $"Still needed today: {FormatDurationRoundedUp(snapshot.TimeLeft)}";
-            TimeLeftLabel.TextColor = ThemeColor("HeroSubtleLight", "HeroSubtleDark");
 
             SwipeActionButton.Text = snapshot.IsCurrentlyInside ? "Swipe out" : "Swipe in";
             SwipeActionButton.BackgroundColor = ThemeColor("White", "SurfaceLight");
@@ -82,7 +76,7 @@ public partial class MainPage : ContentPage
             OfficeDaysLeftWeekLabel.Text = snapshot.OfficeDaysLeftThisWeek == 0
                 ? "Weekly target met"
                 : $"{snapshot.OfficeDaysLeftThisWeek} days left";
-            WeeklyStreakLabel.Text = FormatWeeks(snapshot.WeeklyStreak);
+            WeeklyStreakLabel.Text = snapshot.WeeklyStreak.ToString();
             BestWeeklyStreakLabel.Text = $"Best: {FormatWeeks(snapshot.BestWeeklyStreak)}";
             GoalDaysLabel.Text = snapshot.GoalDaysThisMonth.ToString();
 
@@ -181,7 +175,7 @@ public partial class MainPage : ContentPage
         }
         else if (snapshot.IsCurrentlyInside)
         {
-            ProgressStatusLabel.Text = "Live tracking is active right now.";
+            ProgressStatusLabel.Text = $"{FormatDurationRoundedUp(snapshot.TimeLeft)} left while tracking live.";
             ProgressStatusLabel.TextColor = ThemeColor("HeroSubtleLight", "HeroSubtleDark");
         }
         else if (snapshot.TodayTotal > TimeSpan.Zero)
@@ -199,19 +193,32 @@ public partial class MainPage : ContentPage
     private async Task UpdateProgressBarAsync(TrackingSnapshot snapshot, bool animate)
     {
         var progress = Math.Clamp(snapshot.TodayTotal.TotalSeconds / snapshot.RequiredTime.TotalSeconds, 0, 1);
-        var targetWidth = (ProgressTrack.Width <= 0 ? ProgressTrack.WidthRequest : ProgressTrack.Width) * progress;
-        ProgressFill.BackgroundColor = snapshot.TodayTotal >= snapshot.RequiredTime
-            ? ThemeColor("SuccessSoftLight", "SuccessBrightDark")
-            : ThemeColor("White", "SurfaceLight");
+        var trackWidth = ProgressTrack.Width <= 0 ? ProgressTrack.WidthRequest : ProgressTrack.Width;
+        var trackHeight = ProgressTrack.Height <= 0 ? ProgressTrack.HeightRequest : ProgressTrack.Height;
+        var targetWidth = trackWidth * progress;
 
-        if (animate)
+        if (progress > 0)
         {
-            await ProgressFill.LayoutTo(new Rect(0, 0, targetWidth, ProgressTrack.Height <= 0 ? 14 : ProgressTrack.Height), 280, Easing.CubicOut);
+            targetWidth = Math.Max(trackHeight, targetWidth);
         }
-        else
+
+        ProgressFill.BackgroundColor = ThemeColor("ProgressAccentLight", "ProgressAccentDark");
+
+        if (!animate)
         {
             ProgressFill.WidthRequest = targetWidth;
+            return;
         }
+
+        var startWidth = ProgressFill.WidthRequest < 0 ? 0 : ProgressFill.WidthRequest;
+        var animation = new Animation(
+            value => ProgressFill.WidthRequest = value,
+            startWidth,
+            targetWidth,
+            Easing.CubicOut);
+
+        animation.Commit(ProgressFill, "ProgressFillWidth", length: 280);
+        await Task.Delay(280);
     }
 
     private void StartLiveTimer()
@@ -290,6 +297,21 @@ public partial class MainPage : ContentPage
 
     private async void WeeklyStreakInfoClose_Clicked(object sender, EventArgs e)
     {
+        await CloseWeeklyStreakInfoAsync();
+    }
+
+    private async void WeeklyStreakInfoBackdrop_Tapped(object sender, TappedEventArgs e)
+    {
+        await CloseWeeklyStreakInfoAsync();
+    }
+
+    private void WeeklyStreakInfoCard_Tapped(object sender, TappedEventArgs e)
+    {
+        // Keep taps inside the info card from acting like backdrop dismissals.
+    }
+
+    private async Task CloseWeeklyStreakInfoAsync()
+    {
         if (!WeeklyStreakInfoOverlay.IsVisible)
         {
             return;
@@ -306,6 +328,16 @@ public partial class MainPage : ContentPage
     }
 
     private static string FormatDuration(TimeSpan timeSpan) => $"{(int)timeSpan.TotalHours}h {timeSpan.Minutes:D2}m";
+
+    private static string FormatHeroDuration(TimeSpan timeSpan, TimeSpan requiredTime)
+    {
+        if (requiredTime.TotalMinutes >= 10)
+        {
+            return FormatDuration(timeSpan);
+        }
+
+        return $"{(int)timeSpan.TotalMinutes}m {timeSpan.Seconds:D2}s";
+    }
 
     private static string FormatDurationRoundedUp(TimeSpan timeSpan)
     {

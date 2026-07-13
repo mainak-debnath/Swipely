@@ -79,12 +79,31 @@
                                TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="8">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Today's progress"
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
+                            <Border Grid.Column="1"
+                                    Padding="10,4"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource HeroGlassLight}, Dark={StaticResource HeroGlassDark}}"
+                                    StrokeThickness="0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="999" />
+                                </Border.StrokeShape>
+                                <Label x:Name="PercentageLabel"
+                                       Text="0%"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
+                            </Border>
+                        </Grid>
+
                         <Grid x:Name="ProgressTrack"
-                              HeightRequest="14"
+                              HeightRequest="12"
                               WidthRequest="320"
                               HorizontalOptions="Start">
-                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource HeroTrackLight}, Dark={StaticResource HeroTrackDark}}"
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource ProgressTrackLight}, Dark={StaticResource ProgressTrackDark}}"
                                     StrokeThickness="0">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="999" />
@@ -93,26 +112,13 @@
 
                             <Border x:Name="ProgressFill"
                                     WidthRequest="0"
-                                    BackgroundColor="#FFFFFF"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource ProgressAccentLight}, Dark={StaticResource ProgressAccentDark}}"
                                     StrokeThickness="0"
                                     HorizontalOptions="Start">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="999" />
                                 </Border.StrokeShape>
                             </Border>
-                        </Grid>
-
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label x:Name="TimeLeftLabel"
-                                   Text="Time left: 8h 00m"
-                                   FontSize="14"
-                                   TextColor="{AppThemeBinding Light={StaticResource HeroSubtleLight}, Dark={StaticResource HeroSubtleDark}}" />
-                            <Label x:Name="PercentageLabel"
-                                   Grid.Column="1"
-                                   Text="0%"
-                                   FontSize="14"
-                                   FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light={StaticResource HeroTextLight}, Dark={StaticResource HeroTextDark}}" />
                         </Grid>
                     </VerticalStackLayout>
 
@@ -126,23 +132,23 @@
             </Border>
 
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                <Border Grid.Column="0" Padding="16" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                <Border Grid.Column="0" Padding="16,16" HeightRequest="130" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="22" />
                     </Border.StrokeShape>
-                    <VerticalStackLayout Spacing="6">
+                    <Grid RowDefinitions="Auto,48,Auto">
                         <Label Text="Office this week" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                        <Label x:Name="OfficeDaysWeekLabel" Text="0 / 3" FontSize="24" FontAttributes="Bold" />
-                        <Label x:Name="OfficeDaysLeftWeekLabel" Text="Weekly target met" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                    </VerticalStackLayout>
+                        <Label x:Name="OfficeDaysWeekLabel" Grid.Row="1" Text="0 / 3" FontSize="24" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                        <Label x:Name="OfficeDaysLeftWeekLabel" Grid.Row="2" Text="Weekly target met" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    </Grid>
                 </Border>
 
-                <Border Grid.Column="1" Padding="16" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                <Border Grid.Column="1" Padding="16,16" HeightRequest="130" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="22" />
                     </Border.StrokeShape>
-                    <VerticalStackLayout Spacing="6">
-                        <Grid ColumnDefinitions="*,Auto">
+                    <Grid RowDefinitions="Auto,48,Auto">
+                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                             <Label Text="Weekly streak" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                             <Border Grid.Column="1"
                                     WidthRequest="20"
@@ -164,19 +170,20 @@
                                        VerticalTextAlignment="Center" />
                             </Border>
                         </Grid>
-                        <Label x:Name="WeeklyStreakLabel" Text="0 weeks" FontSize="24" FontAttributes="Bold" />
-                        <Label x:Name="BestWeeklyStreakLabel" Text="Best: 0 weeks" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                    </VerticalStackLayout>
+                        <Label x:Name="WeeklyStreakLabel" Grid.Row="1" Text="0" FontSize="24" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                        <Label x:Name="BestWeeklyStreakLabel" Grid.Row="2" Text="Best: 0 weeks" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    </Grid>
                 </Border>
 
-                <Border Grid.Column="2" Padding="16" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+                <Border Grid.Column="2" Padding="16,16" HeightRequest="130" BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="22" />
                     </Border.StrokeShape>
-                    <VerticalStackLayout Spacing="6">
+                    <Grid RowDefinitions="Auto,48,Auto">
                         <Label Text="Goal days this month" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                        <Label x:Name="GoalDaysLabel" Text="0" FontSize="24" FontAttributes="Bold" />
-                    </VerticalStackLayout>
+                        <Label x:Name="GoalDaysLabel" Grid.Row="1" Text="0" FontSize="24" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                        <Label Grid.Row="2" Text="This month" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    </Grid>
                 </Border>
             </Grid>
 
@@ -259,6 +266,9 @@
               Opacity="0"
               Padding="22"
               BackgroundColor="{AppThemeBinding Light={StaticResource OverlayLight}, Dark={StaticResource OverlayDark}}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="WeeklyStreakInfoBackdrop_Tapped" />
+            </Grid.GestureRecognizers>
             <Border x:Name="WeeklyStreakInfoCard"
                     Padding="0"
                     MaximumWidthRequest="420"
@@ -266,6 +276,9 @@
                     VerticalOptions="Center"
                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderColorLight}, Dark={StaticResource BorderColorDark}}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="WeeklyStreakInfoCard_Tapped" />
+                </Border.GestureRecognizers>
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="30" />
                 </Border.StrokeShape>

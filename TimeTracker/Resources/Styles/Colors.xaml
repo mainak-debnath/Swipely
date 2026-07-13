@@ -31,6 +31,10 @@
     <Color x:Key="AccentSoftDark">#183366</Color>
     <Color x:Key="Success">#0F9F6E</Color>
     <Color x:Key="SuccessBrightDark">#34D399</Color>
+    <Color x:Key="ProgressAccentLight">#5EF0B2</Color>
+    <Color x:Key="ProgressAccentDark">#5EF0B2</Color>
+    <Color x:Key="ProgressTrackLight">#26000000</Color>
+    <Color x:Key="ProgressTrackDark">#42000000</Color>
     <Color x:Key="SuccessSoftLight">#DCF7EC</Color>
     <Color x:Key="SuccessSoftDark">#12372F</Color>
     <Color x:Key="Danger">#D34C6A</Color>
